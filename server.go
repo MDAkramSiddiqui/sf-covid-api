@@ -12,6 +12,12 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 )
 
+var DefaultLoggerConfig = middleware.LoggerConfig{
+	Skipper:          middleware.DefaultSkipper,
+	Format:           `[MIDDL]: ${time_custom} Req.Id: ${id}, IP: ${remote_ip}, Method: ${method}, Latency: ${latency}, UserAgent: ${user_agent}` + "\n",
+	CustomTimeFormat: "2006/01/02 15:04:05",
+}
+
 func init() {
 	err := godotenv.Load()
 	if err != nil {
@@ -30,7 +36,7 @@ func main() {
 	e := echo.New()
 
 	// middlewares
-	e.Use(middleware.Logger())
+	e.Use(middleware.LoggerWithConfig(DefaultLoggerConfig))
 	e.Use(middleware.RequestID())
 	e.Use(middleware.Recover())
 
