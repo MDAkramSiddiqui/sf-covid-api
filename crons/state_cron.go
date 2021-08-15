@@ -7,7 +7,6 @@ import (
 
 	"github.com/MDAkramSiddiqui/sf-covid-api/app/constants"
 	"github.com/MDAkramSiddiqui/sf-covid-api/app/drivers"
-	"github.com/MDAkramSiddiqui/sf-covid-api/app/logger"
 	"github.com/MDAkramSiddiqui/sf-covid-api/app/services"
 	"github.com/robfig/cron/v3"
 	"go.mongodb.org/mongo-driver/bson"
@@ -47,9 +46,9 @@ func (c *DataCron) Stop() {
 }
 
 func updateCovidData() {
-	data := services.GetAllStateCovidDataGovtApi()
-	logger.INFO("PRINTED EVERYTHONF")
 	var covidStatesData []CovidState
+
+	data := services.GetAllStateCovidDataGovtApi()
 	json.Unmarshal(data, &covidStatesData)
 
 	mongoDriverInstance, err := drivers.GetMongoDriver()
