@@ -30,16 +30,11 @@ type StateItems struct {
 }
 
 func StateService(stateName string) primitive.M {
-
-	if stateName == "" {
-		return nil
-	}
-
 	var data bson.M
-	mongoDriverInstance, _ := drivers.GetMongoDriver()
-	coll := mongoDriverInstance.Database(os.Getenv(constants.MongoDBName)).Collection("covid-state")
 
 	stateName = strings.Trim(strings.TrimSpace(stateName), "\"")
+	mongoDriverInstance, _ := drivers.GetMongoDriver()
+	coll := mongoDriverInstance.Database(os.Getenv(constants.MongoDBName)).Collection("covid-state")
 
 	_ = coll.FindOne(
 		context.TODO(),
