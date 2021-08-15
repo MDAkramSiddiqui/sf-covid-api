@@ -4,14 +4,11 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
-	"log"
-	"net/http"
 	"os"
 	"strings"
 
 	"github.com/MDAkramSiddiqui/sf-covid-api/app/constants"
-	"github.com/MDAkramSiddiqui/sf-covid-api/app/logger"
+	"github.com/MDAkramSiddiqui/sf-covid-api/app/utils"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -59,36 +56,12 @@ func StateService2() []primitive.M {
 }
 
 func FetchCovidStateWiseData() []byte {
-	resp, err := http.Get(constants.CovidDataApi)
-	if err != nil {
-		logger.FATAL(err.Error())
-		return nil
-	}
-
-	defer resp.Body.Close()
-
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		log.Fatalln(err)
-	}
-
+	body, _ := utils.GetRequest(constants.CovidDataApi)
 	return body
 }
 
 func FetchStateName(url string) string {
-	resp, err := http.Get(url)
-	if err != nil {
-		logger.FATAL(err.Error())
-		return ""
-	}
-
-	defer resp.Body.Close()
-
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		log.Fatalln(err)
-	}
-
+	body, _ := utils.GetRequest(url)
 	var stateData StateItems
 	json.Unmarshal(body, &stateData)
 	if len(stateData.Items) > 0 {
