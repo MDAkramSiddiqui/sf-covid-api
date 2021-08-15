@@ -1,13 +1,33 @@
 package constants
 
+// Api Uri constants
 const (
 	CovidDataApi        = "https://www.mohfw.gov.in/data/datanew.json"
 	HereGeoCordinateApi = `https://revgeocode.search.hereapi.com/v1/revgeocode?at={{.LAT}}%2C{{.LONG}}&apiKey={{.API_KEY}}`
+)
 
+// Environment Variables Key Constants
+const (
+	Env             = "ENV"
 	MongoDBUrl      = "MONGO_DB_URL"
 	MongoDBPassword = "MONGO_DB_PASSWORD"
 	MongoDBName     = "MONGO_DB_NAME"
 	HereGeoAPIKey   = "HERE_GEO_API_KEY"
+)
+
+// Severity levels.
+const (
+	Debug int = iota
+	Info
+	Warn
+	Err
+	Fatal
+)
+
+// Possible App Environments
+const (
+	DEVELOPMENT = "DEVELOPMENT"
+	PRODUCTION  = "PRODUCTION"
 )
 
 // func StateNames() map[string]string {

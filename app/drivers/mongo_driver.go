@@ -2,12 +2,12 @@ package drivers
 
 import (
 	"context"
-	"fmt"
 	"os"
 	"strings"
 	"sync"
 
 	"github.com/MDAkramSiddiqui/sf-covid-api/app/constants"
+	"github.com/MDAkramSiddiqui/sf-covid-api/app/log"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -24,6 +24,8 @@ var mongoOnce sync.Once
 
 //GetMongoDriver - Return mongodb connection to work with
 func GetMongoDriver() (*mongo.Client, error) {
+	log.Instance.Debug("GetMongoDriver is hit")
+
 	mongoDriverInstanceError = nil
 	//Perform connection creation operation only once.
 	mongoOnce.Do(func() {
@@ -32,13 +34,13 @@ func GetMongoDriver() (*mongo.Client, error) {
 		driver, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(connectURI))
 		if err != nil {
 			mongoDriverInstanceError = err
-			fmt.Printf("Unable to connect to database : %v", err)
+			log.Instance.Fatal("Unable to connect to database", err)
 		}
 		err = driver.Ping(context.Background(), nil)
 		if err != nil {
 			mongoDriverInstanceError = err
 		}
-		fmt.Println("Connection Made successfully")
+		log.Instance.Info("Connection made successfully")
 		mongoDriverInstance = driver
 	})
 	return mongoDriverInstance, mongoDriverInstanceError

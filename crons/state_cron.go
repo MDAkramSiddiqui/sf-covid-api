@@ -7,6 +7,7 @@ import (
 
 	"github.com/MDAkramSiddiqui/sf-covid-api/app/constants"
 	"github.com/MDAkramSiddiqui/sf-covid-api/app/drivers"
+	"github.com/MDAkramSiddiqui/sf-covid-api/app/log"
 	"github.com/MDAkramSiddiqui/sf-covid-api/app/services"
 	"github.com/robfig/cron/v3"
 	"go.mongodb.org/mongo-driver/bson"
@@ -39,13 +40,17 @@ func init() {
 
 func (c *DataCron) Start() {
 	c.job.Start()
+	log.Instance.Info("State covid-data refresh cron job started successfully")
 }
 
 func (c *DataCron) Stop() {
 	c.job.Stop()
+	log.Instance.Info("State covid-data refresh cron job stopped successfully")
 }
 
 func updateCovidData() {
+	log.Instance.Debug("updateCovidData is hit")
+
 	var covidStatesData []CovidState
 
 	data := services.GetAllStateCovidDataGovtApi()

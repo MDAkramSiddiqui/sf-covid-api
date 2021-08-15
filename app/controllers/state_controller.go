@@ -1,15 +1,17 @@
 package controllers
 
 import (
-	"fmt"
 	"net/http"
 	"strings"
 
+	"github.com/MDAkramSiddiqui/sf-covid-api/app/log"
 	"github.com/MDAkramSiddiqui/sf-covid-api/app/services"
 	"github.com/labstack/echo/v4"
 )
 
 func StateController(c echo.Context) error {
+	log.Instance.Debug("StateController is hit")
+
 	var stateName string
 	var latLang []string
 
@@ -19,14 +21,14 @@ func StateController(c echo.Context) error {
 	if len(latLang) == 2 {
 		stateName = services.GetStateNameUsingLatAndLong(latLang)
 	} else {
-		fmt.Println("latitude and longitude invalid or not provided")
+		log.Instance.Warn("Latitude and longitude invalid or not provided")
 	}
 
 	if stateName == "" {
-		fmt.Println("State name not provided")
+		log.Instance.Warn("State name not provided")
 		val := services.GetAllStateCovidData()
 		return c.JSON(http.StatusOK, val)
 	}
-	resp := services.StateService(stateName)
+	resp := services.GetStateCovidData(stateName)
 	return c.JSON(http.StatusOK, resp)
 }

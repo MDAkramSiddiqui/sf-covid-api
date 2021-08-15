@@ -11,6 +11,7 @@ import (
 
 	"github.com/MDAkramSiddiqui/sf-covid-api/app/constants"
 	"github.com/MDAkramSiddiqui/sf-covid-api/app/drivers"
+	"github.com/MDAkramSiddiqui/sf-covid-api/app/log"
 	"github.com/MDAkramSiddiqui/sf-covid-api/app/utils"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -29,7 +30,9 @@ type StateItems struct {
 	Items []StateData `json:"items" bson:"items"`
 }
 
-func StateService(stateName string) primitive.M {
+func GetStateCovidData(stateName string) primitive.M {
+	log.Instance.Debug("GetStateCovidData is hit")
+
 	var data bson.M
 
 	stateName = strings.Trim(strings.TrimSpace(stateName), "\"")
@@ -45,6 +48,8 @@ func StateService(stateName string) primitive.M {
 }
 
 func GetAllStateCovidData() []primitive.M {
+	log.Instance.Debug("GetAllStateCovidData is hit")
+
 	var data []bson.M
 	mongoDriverInstance, _ := drivers.GetMongoDriver()
 	coll := mongoDriverInstance.Database(os.Getenv(constants.MongoDBName)).Collection("covid-state")
@@ -54,11 +59,15 @@ func GetAllStateCovidData() []primitive.M {
 }
 
 func GetAllStateCovidDataGovtApi() []byte {
+	log.Instance.Debug("GetAllStateCovidDataGovtApi is hit")
+
 	body, _ := utils.GetRequest(constants.CovidDataApi)
 	return body
 }
 
 func GetStateNameUsingLatAndLong(latLang []string) string {
+	log.Instance.Debug("GetStateNameUsingLatAndLong is hit")
+
 	var stateName string
 	var stateData StateItems
 

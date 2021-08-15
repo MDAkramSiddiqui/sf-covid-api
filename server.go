@@ -1,8 +1,11 @@
 package main
 
 import (
+	"os"
+
+	"github.com/MDAkramSiddiqui/sf-covid-api/app/constants"
 	"github.com/MDAkramSiddiqui/sf-covid-api/app/controllers"
-	"github.com/MDAkramSiddiqui/sf-covid-api/app/logger"
+	"github.com/MDAkramSiddiqui/sf-covid-api/app/log"
 	"github.com/MDAkramSiddiqui/sf-covid-api/crons"
 	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
@@ -10,7 +13,17 @@ import (
 )
 
 func init() {
-	_ = godotenv.Load(".env")
+	err := godotenv.Load()
+	if err != nil {
+		log.Instance.Fatal("Error while loading environment variables", err)
+	}
+
+	log.Init()
+	if os.Getenv(constants.Env) == constants.PRODUCTION {
+		log.Instance.SetLogLevel(3)
+	} else {
+		log.Instance.SetLogLevel(0)
+	}
 }
 
 func main() {
@@ -25,10 +38,6 @@ func main() {
 	e.GET("/ping", controllers.HealthController)
 	e.GET("/v1/covid-data/state", controllers.StateController)
 
-	logger.Init()
-	logger.SetLogLevel(0)
-	logger.DEBUG("Server Started")
 	e.Logger.Fatal(e.Start(":5000"))
-
 	crons.StateDataCron.Start()
 }
