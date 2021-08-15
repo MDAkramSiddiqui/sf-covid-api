@@ -1,9 +1,11 @@
 package services
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
+	"html/template"
 	"os"
 	"strings"
 
@@ -47,7 +49,7 @@ func StateService(stateName string) primitive.M {
 	return data
 }
 
-func StateService2() []primitive.M {
+func GetAllStateCovidData() []primitive.M {
 	var data []bson.M
 	mongoDriverInstance, _ := drivers.GetMongoDriver()
 	coll := mongoDriverInstance.Database(os.Getenv(constants.MongoDBName)).Collection("covid-state")
@@ -56,20 +58,35 @@ func StateService2() []primitive.M {
 	return data
 }
 
-func FetchCovidStateWiseData() []byte {
+func GetAllStateCovidDataGovtApi() []byte {
 	body, _ := utils.GetRequest(constants.CovidDataApi)
 	return body
 }
 
-func FetchStateName(url string) string {
-	body, _ := utils.GetRequest(url)
+func GetStateNameUsingLatAndLong(latLang []string) string {
+	var stateName string
 	var stateData StateItems
-	json.Unmarshal(body, &stateData)
+
+	hereGeoCordinateApiMapper := map[string]string{
+		"API_KEY": os.Getenv(constants.HereGeoAPIKey),
+		"LAT":     latLang[0],
+		"LONG":    latLang[1],
+	}
+
+	buf := bytes.Buffer{}
+	t := template.Must(template.New("").Parse(constants.HereGeoCordinateApi))
+	t.Execute(&buf, hereGeoCordinateApiMapper)
+	url := buf.String()
+
+	response, _ := utils.GetRequest(url)
+	json.Unmarshal(response, &stateData)
+
 	if len(stateData.Items) > 0 {
-		stateName := stateData.Items[0].Address.StateName
+		stateName = stateData.Items[0].Address.StateName
 		stateName = strings.ReplaceAll(stateName, "&", "and")
 		fmt.Println(stateName)
 		return stateName
 	}
-	return ""
+
+	return stateName
 }

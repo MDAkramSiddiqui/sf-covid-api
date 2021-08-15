@@ -47,7 +47,7 @@ func (c *DataCron) Stop() {
 }
 
 func updateCovidData() {
-	data := services.FetchCovidStateWiseData()
+	data := services.GetAllStateCovidDataGovtApi()
 	logger.INFO("PRINTED EVERYTHONF")
 	var covidStatesData []CovidState
 	json.Unmarshal(data, &covidStatesData)
