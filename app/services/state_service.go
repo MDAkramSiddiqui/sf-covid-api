@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
 	"strings"
 
 	"github.com/MDAkramSiddiqui/sf-covid-api/app/constants"
@@ -36,7 +37,7 @@ func StateService(stateName string) primitive.M {
 
 	var data bson.M
 	client, _ := GetMongoClient()
-	coll := client.Database("covid").Collection("covid-state")
+	coll := client.Database(os.Getenv(constants.MongoDBName)).Collection("covid-state")
 
 	stateName = strings.Trim(strings.TrimSpace(stateName), "\"")
 
@@ -51,7 +52,7 @@ func StateService(stateName string) primitive.M {
 func StateService2() []primitive.M {
 	var data []bson.M
 	client, _ := GetMongoClient()
-	coll := client.Database("covid").Collection("covid-state")
+	coll := client.Database(os.Getenv(constants.MongoDBName)).Collection("covid-state")
 	cursor, _ := coll.Find(context.TODO(), bson.M{})
 	_ = cursor.All(context.TODO(), &data)
 	return data

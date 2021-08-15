@@ -3,7 +3,9 @@ package models
 import (
 	"context"
 	"log"
+	"os"
 
+	"github.com/MDAkramSiddiqui/sf-covid-api/app/constants"
 	"github.com/MDAkramSiddiqui/sf-covid-api/app/services"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -30,7 +32,7 @@ func CreateState(state CovidState) error {
 	}
 
 	//Create a handle to the respective collection in the database.
-	collection := client.Database("covid").Collection("covid-state")
+	collection := client.Database(os.Getenv(constants.MongoDBName)).Collection("covid-state")
 	//Perform InsertOne operation & validate against the error.
 	_, err = collection.InsertOne(context.TODO(), state)
 	if err != nil {
@@ -46,7 +48,7 @@ func GetAllCollectionNames() []string {
 		return nil
 	}
 
-	result, err := client.Database("covid").ListCollectionNames(context.TODO(), bson.D{{"options.capped", true}})
+	result, err := client.Database(os.Getenv(constants.MongoDBName)).ListCollectionNames(context.TODO(), bson.D{{"options.capped", true}})
 	if err != nil {
 		log.Fatal(err)
 	}

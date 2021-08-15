@@ -6,6 +6,7 @@ const (
 
 	MongoDBUrl      = "MONGO_DB_URL"
 	MongoDBPassword = "MONGO_DB_PASSWORD"
+	MongoDBName     = "MONGO_DB_NAME"
 	HereGeoAPIKey   = "HERE_GEO_API_KEY"
 )
 
