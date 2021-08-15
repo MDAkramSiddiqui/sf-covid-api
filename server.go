@@ -3,9 +3,14 @@ package main
 import (
 	"github.com/MDAkramSiddiqui/sf-covid-api/app/controllers"
 	"github.com/MDAkramSiddiqui/sf-covid-api/app/logger"
+	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 )
+
+func init() {
+	_ = godotenv.Load(".env")
+}
 
 func main() {
 	e := echo.New()
@@ -16,8 +21,8 @@ func main() {
 	e.Use(middleware.Recover())
 
 	// routes
-	e.GET("/", controllers.HealthController)
-	e.GET("/v1/state", controllers.StateController)
+	e.GET("/ping", controllers.HealthController)
+	e.GET("/v1/covid-data/state", controllers.StateController)
 
 	logger.Init()
 	logger.SetLogLevel(0)

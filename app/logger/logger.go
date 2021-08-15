@@ -99,6 +99,12 @@ func FATAL(message string) {
 	}
 }
 
+func FATALf(err error) {
+	if defaultLogger.level <= sFatal {
+		defaultLogger.output(sFatal, err.Error())
+	}
+}
+
 // func messageBuilder(msg string) string {
 // 	r, _ := regexp.Compile("/password[^,}\]]*/gim")
 // 	msg = r.ReplaceAllString(msg, "password:'********'")
