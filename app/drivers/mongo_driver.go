@@ -1,4 +1,4 @@
-package services
+package drivers
 
 import (
 	"context"
@@ -12,39 +12,34 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-type MongoConnectionURI struct {
-	PASSWORD string
-	DB_NAME  string
-}
-
 /* Used to create a singleton object of MongoDB client.
-Initialized and exposed through  GetMongoClient().*/
-var clientInstance *mongo.Client
+Initialized and exposed through  GetMongoDriver().*/
+var mongoDriverInstance *mongo.Client
 
-//Used during creation of singleton client object in GetMongoClient().
-var clientInstanceError error
+//Used during creation of singleton client object in GetMongoDriver().
+var mongoDriverInstanceError error
 
 //Used to execute client creation procedure only once.
 var mongoOnce sync.Once
 
-//GetMongoClient - Return mongodb connection to work with
-func GetMongoClient() (*mongo.Client, error) {
-	clientInstanceError = nil
+//GetMongoDriver - Return mongodb connection to work with
+func GetMongoDriver() (*mongo.Client, error) {
+	mongoDriverInstanceError = nil
 	//Perform connection creation operation only once.
 	mongoOnce.Do(func() {
 
 		connectURI := strings.Replace(os.Getenv(constants.MongoDBUrl), "<password>", os.Getenv(constants.MongoDBPassword), 1)
-		client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(connectURI))
+		driver, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(connectURI))
 		if err != nil {
-			clientInstanceError = err
+			mongoDriverInstanceError = err
 			fmt.Printf("Unable to connect to database : %v", err)
 		}
-		err = client.Ping(context.Background(), nil)
+		err = driver.Ping(context.Background(), nil)
 		if err != nil {
-			clientInstanceError = err
+			mongoDriverInstanceError = err
 		}
 		fmt.Println("Connection Made successfully")
-		clientInstance = client
+		mongoDriverInstance = driver
 	})
-	return clientInstance, clientInstanceError
+	return mongoDriverInstance, mongoDriverInstanceError
 }

@@ -1,4 +1,4 @@
-package cronjobs
+package crons
 
 import (
 	"context"
@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/MDAkramSiddiqui/sf-covid-api/app/constants"
+	"github.com/MDAkramSiddiqui/sf-covid-api/app/drivers"
 	"github.com/MDAkramSiddiqui/sf-covid-api/app/logger"
 	"github.com/MDAkramSiddiqui/sf-covid-api/app/services"
 	"github.com/robfig/cron/v3"
@@ -51,7 +52,7 @@ func updateCovidData() {
 	var covidStatesData []CovidState
 	json.Unmarshal(data, &covidStatesData)
 
-	client, err := services.GetMongoClient()
+	mongoDriverInstance, err := drivers.GetMongoDriver()
 	if err != nil {
 		return
 	}
@@ -71,7 +72,7 @@ func updateCovidData() {
 			{Key: "newCuredCases", Value: covidStatesData[i].NewCuredCases},
 		}
 
-		coll := client.Database(os.Getenv(constants.MongoDBName)).Collection("covid-state")
+		coll := mongoDriverInstance.Database(os.Getenv(constants.MongoDBName)).Collection("covid-state")
 		_ = coll.FindOneAndReplace(
 			context.TODO(),
 			filter,

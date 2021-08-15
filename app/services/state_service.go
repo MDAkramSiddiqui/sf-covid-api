@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/MDAkramSiddiqui/sf-covid-api/app/constants"
+	"github.com/MDAkramSiddiqui/sf-covid-api/app/drivers"
 	"github.com/MDAkramSiddiqui/sf-covid-api/app/utils"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -33,8 +34,8 @@ func StateService(stateName string) primitive.M {
 	}
 
 	var data bson.M
-	client, _ := GetMongoClient()
-	coll := client.Database(os.Getenv(constants.MongoDBName)).Collection("covid-state")
+	mongoDriverInstance, _ := drivers.GetMongoDriver()
+	coll := mongoDriverInstance.Database(os.Getenv(constants.MongoDBName)).Collection("covid-state")
 
 	stateName = strings.Trim(strings.TrimSpace(stateName), "\"")
 
@@ -48,8 +49,8 @@ func StateService(stateName string) primitive.M {
 
 func StateService2() []primitive.M {
 	var data []bson.M
-	client, _ := GetMongoClient()
-	coll := client.Database(os.Getenv(constants.MongoDBName)).Collection("covid-state")
+	mongoDriverInstance, _ := drivers.GetMongoDriver()
+	coll := mongoDriverInstance.Database(os.Getenv(constants.MongoDBName)).Collection("covid-state")
 	cursor, _ := coll.Find(context.TODO(), bson.M{})
 	_ = cursor.All(context.TODO(), &data)
 	return data
