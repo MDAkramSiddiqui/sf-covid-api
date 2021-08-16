@@ -28,12 +28,13 @@ var DefaultLoggerConfig = middleware.LoggerConfig{
 }
 
 func init() {
+	log.Init()
+
 	err := godotenv.Load()
 	if err != nil {
 		log.Instance.Fatal("Error while loading environment variables", err)
 	}
 
-	log.Init()
 	if os.Getenv(constants.Env) == constants.Production {
 		log.Instance.SetLogLevel(3)
 	} else {
