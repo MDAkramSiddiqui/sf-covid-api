@@ -3,6 +3,7 @@ package crons
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"os"
 
 	"github.com/MDAkramSiddiqui/sf-covid-api/app/constants"
@@ -28,24 +29,25 @@ type CovidState struct {
 }
 
 type DataCron struct {
-	job *cron.Cron
+	name string
+	job  *cron.Cron
 }
 
 var StateDataCron *DataCron
 
 func init() {
-	StateDataCron = &DataCron{cron.New()}
+	StateDataCron = &DataCron{"StateDataCron", cron.New()}
 	StateDataCron.job.AddFunc("*/30 * * * *", updateCovidData)
 }
 
 func (c *DataCron) Start() {
 	c.job.Start()
-	log.Instance.Info("State covid-data refresh cron job started successfully")
+	log.Instance.Info(fmt.Sprintf("%v job started successfully", c.name))
 }
 
 func (c *DataCron) Stop() {
 	c.job.Stop()
-	log.Instance.Info("State covid-data refresh cron job stopped successfully")
+	log.Instance.Info(fmt.Sprintf("%v job stopped successfully", c.name))
 }
 
 func updateCovidData() {
