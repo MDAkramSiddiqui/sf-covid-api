@@ -32,7 +32,7 @@ func init() {
 
 	err := godotenv.Load()
 	if err != nil {
-		log.Instance.Fatal("Error while loading environment variables", err)
+		log.Instance.Err("Error while loading environment variables", err)
 	}
 
 	if os.Getenv(constants.Env) == constants.Production {
