@@ -107,7 +107,7 @@ var SwaggerInfo = swaggerInfo{
 	Version:     "1.0",
 	Host:        "",
 	BasePath:    "/api/v1/",
-	Schemes:     []string{"http"},
+	Schemes:     []string{"https", "http"},
 	Title:       "SF-Covid-State Api",
 	Description: "This is a simple server for requesting covid data of state",
 }
