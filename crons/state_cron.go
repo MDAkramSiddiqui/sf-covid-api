@@ -26,7 +26,7 @@ var StateDataCron *DataCron
 
 func init() {
 	StateDataCron = &DataCron{"StateDataCron", cron.New()}
-	StateDataCron.job.AddFunc("*/1 * * * *", updateCovidData)
+	StateDataCron.job.AddFunc("*/30 * * * *", updateCovidData)
 }
 
 func (c *DataCron) Start() {
