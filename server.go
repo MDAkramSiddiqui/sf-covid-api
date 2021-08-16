@@ -69,9 +69,12 @@ func main() {
 	e.Use(middleware.CORS())
 
 	// routes
+	e.GET("/", func(c echo.Context) error {
+		return c.Redirect(http.StatusPermanentRedirect, "/swagger/index.html")
+	})
+	e.GET("/swagger/*", echoSwagger.WrapHandler)
 	e.GET("/api/v1/ping", controllers.HealthController)
 	e.GET("/api/v1/covid-data/state", controllers.StateController)
-	e.GET("/swagger/*", echoSwagger.WrapHandler)
 
 	port := os.Getenv(constants.Port)
 	if port == "" {
