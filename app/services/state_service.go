@@ -133,7 +133,13 @@ func GetStateNameUsingLatAndLong(latLang []string) string {
 	if len(stateData.Items) > 0 {
 		stateName = stateData.Items[0].Address.StateName
 		stateName = strings.ReplaceAll(stateName, "&", "and")
-		log.Instance.Info(fmt.Sprintf("State %v is located for coordinates %v, %v", stateName, latLang[1], latLang[1]))
+
+		if stateName == "" {
+			log.Instance.Info(fmt.Sprintf("Not state found for coordinates %v, %v", latLang[0], latLang[1]))
+		} else {
+			log.Instance.Info(fmt.Sprintf("State %v is located for coordinates %v, %v", stateName, latLang[0], latLang[1]))
+		}
+
 		return stateName
 	}
 
