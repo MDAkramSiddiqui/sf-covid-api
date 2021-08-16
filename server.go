@@ -33,7 +33,7 @@ func init() {
 	}
 
 	log.Init()
-	if os.Getenv(constants.Env) == constants.PRODUCTION {
+	if os.Getenv(constants.Env) == constants.Production {
 		log.Instance.SetLogLevel(3)
 	} else {
 		log.Instance.SetLogLevel(0)

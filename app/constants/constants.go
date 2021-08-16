@@ -27,8 +27,8 @@ const (
 
 // Possible App Environments
 const (
-	DEVELOPMENT = "DEVELOPMENT"
-	PRODUCTION  = "PRODUCTION"
+	Development = "DEVELOPMENT"
+	Production  = "PRODUCTION"
 )
 
 // func StateNames() map[string]string {
