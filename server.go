@@ -1,8 +1,12 @@
 package main
 
 import (
+	"context"
 	"fmt"
+	"net/http"
 	"os"
+	"os/signal"
+	"time"
 
 	"github.com/MDAkramSiddiqui/sf-covid-api/app/constants"
 	"github.com/MDAkramSiddiqui/sf-covid-api/app/controllers"
@@ -69,6 +73,27 @@ func main() {
 		port = "5000"
 	}
 
-	e.Logger.Fatal(e.Start(fmt.Sprintf(":%v", port)))
+	// Start server
+	go func() {
+		if err := e.Start(fmt.Sprintf(":%v", port)); err != nil {
+			if err != http.ErrServerClosed {
+				log.Instance.Fatal("Server start failed, shutting down server", err)
+			}
+			crons.StateDataCron.Stop()
+		}
+	}()
+
+	log.Instance.Info(fmt.Sprintf("Starting server at port %v", port))
 	crons.StateDataCron.Start()
+
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, os.Interrupt)
+	<-quit
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	if err := e.Shutdown(ctx); err != nil {
+		log.Instance.Fatal("Shutting down server failed", err)
+	} else {
+		log.Instance.Info("Server shut down successfully")
+	}
 }
