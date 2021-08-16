@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/MDAkramSiddiqui/sf-covid-api/app/log"
+	"github.com/MDAkramSiddiqui/sf-covid-api/app/response_model"
 	"github.com/labstack/echo/v4"
 )
 
@@ -18,5 +19,5 @@ import (
 func HealthController(c echo.Context) error {
 	log.Instance.Debug("HealthController is hit")
 
-	return c.String(http.StatusOK, "pong")
+	return c.JSON(http.StatusOK, response_model.DefaultResponse(http.StatusOK, "pong"))
 }

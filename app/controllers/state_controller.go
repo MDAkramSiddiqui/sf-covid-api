@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/MDAkramSiddiqui/sf-covid-api/app/log"
+	"github.com/MDAkramSiddiqui/sf-covid-api/app/response_model"
 	"github.com/MDAkramSiddiqui/sf-covid-api/app/services"
 	"github.com/labstack/echo/v4"
 )
@@ -40,8 +41,8 @@ func StateController(c echo.Context) error {
 	if stateName == "" {
 		log.Instance.Warn("State name not provided")
 		val := services.GetAllStateCovidData()
-		return c.JSON(http.StatusOK, val)
+		return c.JSON(http.StatusOK, response_model.DefaultResponse(http.StatusOK, val))
 	}
 	resp := services.GetStateCovidData(stateName)
-	return c.JSON(http.StatusOK, resp)
+	return c.JSON(http.StatusOK, response_model.DefaultResponse(http.StatusOK, resp))
 }

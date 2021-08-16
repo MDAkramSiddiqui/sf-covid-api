@@ -25,3 +25,8 @@ type TCovidStateData struct {
 type TCovidStateItems struct {
 	Items []TCovidStateData `json:"items" bson:"items"`
 }
+
+type TDefaultResponse struct {
+	Status string      `json:"status"`
+	Data   interface{} `json:"data"`
+}

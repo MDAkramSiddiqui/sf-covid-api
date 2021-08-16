@@ -36,7 +36,7 @@ func GetStateCovidData(stateName string) primitive.M {
 			log.Instance.Info(fmt.Sprintf("State: %v data not found in redis requesting from DB", stateName))
 		} else {
 			json.Unmarshal(result, &data)
-			log.Instance.Info("All states data found in redis")
+			log.Instance.Info(fmt.Sprintf("State: %v data found in redis", stateName))
 			return data
 		}
 	}
