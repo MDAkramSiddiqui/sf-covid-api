@@ -18,7 +18,6 @@
         },
         "version": "1.0"
     },
-    "host": "localhost:5000",
     "basePath": "/api/v1/",
     "paths": {
         "/covid-data/state": {
