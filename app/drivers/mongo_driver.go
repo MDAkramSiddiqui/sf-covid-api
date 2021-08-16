@@ -40,7 +40,7 @@ func GetMongoDriver() (*mongo.Client, error) {
 		if err != nil {
 			mongoDriverInstanceError = err
 		}
-		log.Instance.Info("Connection made successfully")
+		log.Instance.Info("MongoDB connection made successfully")
 		mongoDriverInstance = driver
 	})
 	return mongoDriverInstance, mongoDriverInstanceError

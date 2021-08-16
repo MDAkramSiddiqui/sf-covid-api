@@ -10,6 +10,7 @@ import (
 
 	"github.com/MDAkramSiddiqui/sf-covid-api/app/constants"
 	"github.com/MDAkramSiddiqui/sf-covid-api/app/controllers"
+	"github.com/MDAkramSiddiqui/sf-covid-api/app/drivers"
 	"github.com/MDAkramSiddiqui/sf-covid-api/app/log"
 	"github.com/MDAkramSiddiqui/sf-covid-api/crons"
 	"github.com/joho/godotenv"
@@ -38,6 +39,9 @@ func init() {
 	} else {
 		log.Instance.SetLogLevel(0)
 	}
+
+	drivers.GetMongoDriver()
+	drivers.GetRedisDriver()
 }
 
 // @title SF-Covid-State Api
