@@ -1,1 +1,1 @@
-web: go run server.go
+web: sf-covid-api
