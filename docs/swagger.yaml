@@ -44,10 +44,13 @@ paths:
       - '*/*'
       description: Get the status of server.
       produces:
-      - text/plain
+      - application/json
       responses:
         "200":
-          description: ""
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
       summary: Show the status of server.
       tags:
       - root

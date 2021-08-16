@@ -13,8 +13,8 @@ import (
 // @Description Get the status of server.
 // @Tags root
 // @Accept */*
-// @Produce plain
-// @Success 200
+// @Produce json
+// @Success 200 {object} map[string]interface{}
 // @Router /ping [get]
 func HealthController(c echo.Context) error {
 	log.Instance.Debug("HealthController is hit")

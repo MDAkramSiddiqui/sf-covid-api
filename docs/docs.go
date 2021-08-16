@@ -77,7 +77,7 @@ var doc = `{
                     "*/*"
                 ],
                 "produces": [
-                    "text/plain"
+                    "application/json"
                 ],
                 "tags": [
                     "root"
@@ -85,7 +85,11 @@ var doc = `{
                 "summary": "Show the status of server.",
                 "responses": {
                     "200": {
-                        "description": ""
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
                     }
                 }
             }
