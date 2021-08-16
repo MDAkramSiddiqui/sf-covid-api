@@ -16,6 +16,7 @@ import (
 	"github.com/MDAkramSiddiqui/sf-covid-api/app/utils"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 func GetStateCovidData(stateName string) primitive.M {
@@ -47,6 +48,7 @@ func GetStateCovidData(stateName string) primitive.M {
 	_ = coll.FindOne(
 		context.TODO(),
 		bson.M{"name": stateName},
+		options.FindOne().SetProjection(bson.M{"_id": 0}),
 	).Decode(&data)
 
 	if !isFoundInRedis {
@@ -85,7 +87,7 @@ func GetAllStateCovidData() []primitive.M {
 
 	mongoDriverInstance, _ := drivers.GetMongoDriver()
 	coll := mongoDriverInstance.Database(os.Getenv(constants.MongoDBName)).Collection("covid-state")
-	cursor, _ := coll.Find(context.TODO(), bson.M{})
+	cursor, _ := coll.Find(context.TODO(), bson.M{}, options.Find().SetProjection(bson.M{"_id": 0}))
 	_ = cursor.All(context.TODO(), &data)
 
 	if !isFoundInRedis {

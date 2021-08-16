@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/MDAkramSiddiqui/sf-covid-api/app/constants"
 	"github.com/MDAkramSiddiqui/sf-covid-api/app/drivers"
@@ -25,7 +26,7 @@ var StateDataCron *DataCron
 
 func init() {
 	StateDataCron = &DataCron{"StateDataCron", cron.New()}
-	StateDataCron.job.AddFunc("*/30 * * * *", updateCovidData)
+	StateDataCron.job.AddFunc("*/1 * * * *", updateCovidData)
 }
 
 func (c *DataCron) Start() {
@@ -52,18 +53,24 @@ func updateCovidData() {
 	}
 
 	for i := 0; i < len(covidStatesData); i++ {
+		stateName := covidStatesData[i].Name
+		if stateName == "" {
+			stateName = "India"
+		}
+
 		opts := options.FindOneAndReplace().SetUpsert(true)
-		filter := bson.M{"name": covidStatesData[i].Name}
+		filter := bson.M{"name": stateName}
 		replacement := bson.D{
-			{Key: "name", Value: covidStatesData[i].Name},
+			{Key: "name", Value: stateName},
 			{Key: "positiveCases", Value: covidStatesData[i].PositiveCases},
 			{Key: "activeCases", Value: covidStatesData[i].ActiveCases},
 			{Key: "deathCases", Value: covidStatesData[i].DeathCases},
 			{Key: "curedCases", Value: covidStatesData[i].CuredCases},
-			{Key: "newPositiveCases", Value: covidStatesData[i].NewPositiveCases},
-			{Key: "newActiveCases", Value: covidStatesData[i].NewActiveCases},
-			{Key: "newDeathCases", Value: covidStatesData[i].NewDeathCases},
-			{Key: "newCuredCases", Value: covidStatesData[i].NewCuredCases},
+			{Key: "latestPositiveCases", Value: covidStatesData[i].LatestPositiveCases},
+			{Key: "latestActiveCases", Value: covidStatesData[i].LatestActiveCases},
+			{Key: "latestDeathCases", Value: covidStatesData[i].LatestDeathCases},
+			{Key: "latestCuredCases", Value: covidStatesData[i].LatestCuredCases},
+			{Key: "updatedAt", Value: time.Now()},
 		}
 
 		coll := mongoDriverInstance.Database(os.Getenv(constants.MongoDBName)).Collection("covid-state")
