@@ -24,7 +24,7 @@ func GetStateCovidData(stateName string) primitive.M {
 	var data bson.M
 	isFoundInRedis := true
 
-	stateName = strings.Title(strings.ToLower(strings.Trim(strings.TrimSpace(stateName), "\"")))
+	stateName = strings.Title(strings.ToLower(strings.TrimSpace(strings.Trim(stateName, "\""))))
 
 	redisDriverInstance, redisDriverInstanceErr := drivers.GetRedisDriver()
 	if redisDriverInstanceErr != nil {
