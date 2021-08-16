@@ -1,8 +1,12 @@
 package drivers
 
 import (
+	"fmt"
+	"os"
+	"strconv"
 	"sync"
 
+	"github.com/MDAkramSiddiqui/sf-covid-api/app/constants"
 	"github.com/MDAkramSiddiqui/sf-covid-api/app/log"
 	"github.com/go-redis/redis"
 )
@@ -21,23 +25,25 @@ var redisOnce sync.Once
 func GetRedisDriver() (*redis.Client, error) {
 	log.Instance.Debug("GetRedisDriver is hit")
 
-	redisDriverInstanceError = nil
+	// redisDriverInstanceError = nil
 	//Perform connection creation operation only once.
 	redisOnce.Do(func() {
 
+		redisDB, _ := strconv.Atoi(os.Getenv(constants.RedisDB))
 		driver := redis.NewClient(&redis.Options{
-			Addr:     "localhost:6379",
-			Password: "",
-			DB:       0,
+			Addr:     fmt.Sprintf("%v:%v", os.Getenv(constants.RedisHost), os.Getenv(constants.RedisPort)),
+			Password: os.Getenv(constants.RedisPassword),
+			DB:       redisDB,
 		})
 
 		_, err := driver.Ping().Result()
 		if err != nil {
 			redisDriverInstanceError = err
-			log.Instance.Fatal("Unable to connect to redis", err)
+			log.Instance.Err("Unable to connect to redis", err)
+		} else {
+			log.Instance.Info("Redis connection made successfully")
 		}
 
-		log.Instance.Info("Redis connection made successfully")
 		redisDriverInstance = driver
 	})
 	return redisDriverInstance, redisDriverInstanceError

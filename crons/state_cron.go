@@ -9,24 +9,12 @@ import (
 	"github.com/MDAkramSiddiqui/sf-covid-api/app/constants"
 	"github.com/MDAkramSiddiqui/sf-covid-api/app/drivers"
 	"github.com/MDAkramSiddiqui/sf-covid-api/app/log"
+	"github.com/MDAkramSiddiqui/sf-covid-api/app/schema"
 	"github.com/MDAkramSiddiqui/sf-covid-api/app/services"
 	"github.com/robfig/cron/v3"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
-
-type CovidState struct {
-	Name             string `json:"state_name" bson:"state_name"`
-	ActiveCases      string `json:"active" bson:"active"`
-	PositiveCases    string `json:"positive" bson:"positive"`
-	CuredCases       string `json:"cured" bson:"cured"`
-	DeathCases       string `json:"death" bson:"death"`
-	NewActiveCases   string `json:"new_active" bson:"new_active"`
-	NewPositiveCases string `json:"new_positive" bson:"new_positive"`
-	NewCuredCases    string `json:"new_cured" bson:"new_cured"`
-	NewDeathCases    string `json:"new_death" bson:"new_death"`
-	StateCode        string `json:"state_code" bson:"state_code"`
-}
 
 type DataCron struct {
 	name string
@@ -53,7 +41,7 @@ func (c *DataCron) Stop() {
 func updateCovidData() {
 	log.Instance.Debug("updateCovidData is hit")
 
-	var covidStatesData []CovidState
+	var covidStatesData []schema.TCovidState
 
 	data := services.GetAllStateCovidDataGovtApi()
 	json.Unmarshal(data, &covidStatesData)

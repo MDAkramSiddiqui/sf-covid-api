@@ -1,5 +1,7 @@
 package constants
 
+import "time"
+
 // Api Uri constants
 const (
 	CovidDataApi        = "https://www.mohfw.gov.in/data/datanew.json"
@@ -14,6 +16,10 @@ const (
 	MongoDBName     = "MONGO_DB_NAME"
 	HereGeoAPIKey   = "HERE_GEO_API_KEY"
 	Port            = "PORT"
+	RedisPort       = "REDIS_PORT"
+	RedisHost       = "REDIS_HOST"
+	RedisDB         = "REDIS_DB"
+	RedisPassword   = "REDIS_PASSWORD"
 )
 
 // Severity levels.
@@ -29,6 +35,10 @@ const (
 const (
 	Development = "DEVELOPMENT"
 	Production  = "PRODUCTION"
+)
+
+const (
+	RedisTTL = time.Minute * 30
 )
 
 // func StateNames() map[string]string {

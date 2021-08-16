@@ -12,30 +12,35 @@ import (
 	"github.com/MDAkramSiddiqui/sf-covid-api/app/constants"
 	"github.com/MDAkramSiddiqui/sf-covid-api/app/drivers"
 	"github.com/MDAkramSiddiqui/sf-covid-api/app/log"
+	"github.com/MDAkramSiddiqui/sf-covid-api/app/schema"
 	"github.com/MDAkramSiddiqui/sf-covid-api/app/utils"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-type StateAddress struct {
-	StateCode string `json:"stateCode" bson:"stateCode"`
-	StateName string `json:"state" bson:"state"`
-}
-
-type StateData struct {
-	Address StateAddress `json:"address" bson:"address"`
-}
-
-type StateItems struct {
-	Items []StateData `json:"items" bson:"items"`
-}
-
 func GetStateCovidData(stateName string) primitive.M {
 	log.Instance.Debug("GetStateCovidData is hit")
 
 	var data bson.M
+	isFoundInRedis := true
 
 	stateName = strings.Trim(strings.TrimSpace(stateName), "\"")
+
+	redisDriverInstance, redisDriverInstanceErr := drivers.GetRedisDriver()
+	if redisDriverInstanceErr != nil {
+		log.Instance.Err("Redis instance is down using db to fetch data", redisDriverInstanceErr)
+	} else {
+		result, _ := redisDriverInstance.Get(stateName).Bytes()
+		if len(result) == 0 {
+			isFoundInRedis = false
+			log.Instance.Info(fmt.Sprintf("State: %v data not found in redis requesting from DB", stateName))
+		} else {
+			json.Unmarshal(result, &data)
+			log.Instance.Info("All states data found in redis")
+			return data
+		}
+	}
+
 	mongoDriverInstance, _ := drivers.GetMongoDriver()
 	coll := mongoDriverInstance.Database(os.Getenv(constants.MongoDBName)).Collection("covid-state")
 
@@ -44,6 +49,16 @@ func GetStateCovidData(stateName string) primitive.M {
 		bson.M{"name": stateName},
 	).Decode(&data)
 
+	if !isFoundInRedis {
+		redisData, _ := json.Marshal(data)
+		err := redisDriverInstance.Set(stateName, redisData, constants.RedisTTL).Err()
+		if err != nil {
+			log.Instance.Err(fmt.Sprintf("Error while saving %v state data in redis", stateName), err)
+		} else {
+			log.Instance.Info(fmt.Sprintf("State: %v data saved in redis", stateName))
+		}
+	}
+
 	return data
 }
 
@@ -51,10 +66,38 @@ func GetAllStateCovidData() []primitive.M {
 	log.Instance.Debug("GetAllStateCovidData is hit")
 
 	var data []bson.M
+	isFoundInRedis := true
+
+	redisDriverInstance, redisDriverInstanceErr := drivers.GetRedisDriver()
+	if redisDriverInstanceErr != nil {
+		log.Instance.Err("Redis instance is down using db to fetch data", redisDriverInstanceErr)
+	} else {
+		result, _ := redisDriverInstance.Get("AllStatesData").Bytes()
+		if len(result) == 0 {
+			isFoundInRedis = false
+			log.Instance.Info("All states data not found in redis requesting from DB")
+		} else {
+			json.Unmarshal(result, &data)
+			log.Instance.Info("All states data found in redis")
+			return data
+		}
+	}
+
 	mongoDriverInstance, _ := drivers.GetMongoDriver()
 	coll := mongoDriverInstance.Database(os.Getenv(constants.MongoDBName)).Collection("covid-state")
 	cursor, _ := coll.Find(context.TODO(), bson.M{})
 	_ = cursor.All(context.TODO(), &data)
+
+	if !isFoundInRedis {
+		redisData, _ := json.Marshal(data)
+		err := redisDriverInstance.Set("AllStatesData", redisData, constants.RedisTTL).Err()
+		if err != nil {
+			log.Instance.Err("Error while saving all states data in redis", err)
+		} else {
+			log.Instance.Info("All states data saved in redis")
+		}
+	}
+
 	return data
 }
 
@@ -69,7 +112,7 @@ func GetStateNameUsingLatAndLong(latLang []string) string {
 	log.Instance.Debug("GetStateNameUsingLatAndLong is hit")
 
 	var stateName string
-	var stateData StateItems
+	var stateData schema.TCovidStateItems
 
 	hereGeoCordinateApiMapper := map[string]string{
 		"API_KEY": strings.TrimSpace(os.Getenv(constants.HereGeoAPIKey)),
