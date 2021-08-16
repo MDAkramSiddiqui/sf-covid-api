@@ -72,7 +72,7 @@ func GetStateNameUsingLatAndLong(latLang []string) string {
 	var stateData StateItems
 
 	hereGeoCordinateApiMapper := map[string]string{
-		"API_KEY": os.Getenv(constants.HereGeoAPIKey),
+		"API_KEY": strings.TrimSpace(os.Getenv(constants.HereGeoAPIKey)),
 		"LAT":     latLang[0],
 		"LONG":    latLang[1],
 	}
@@ -88,7 +88,7 @@ func GetStateNameUsingLatAndLong(latLang []string) string {
 	if len(stateData.Items) > 0 {
 		stateName = stateData.Items[0].Address.StateName
 		stateName = strings.ReplaceAll(stateName, "&", "and")
-		fmt.Println(stateName)
+		log.Instance.Info(fmt.Sprintf("State %v is located for coordinates %v, %v", stateName, latLang[1], latLang[1]))
 		return stateName
 	}
 

@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"net/http"
+	"net/url"
 	"strings"
 
 	"github.com/MDAkramSiddiqui/sf-covid-api/app/log"
@@ -9,6 +10,16 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+// Statewise Covid Data Doc godoc
+// @Summary Serves statewise covid data.
+// @Description Get statewise covid data either via using name or latitude and longitude.
+// @Tags root
+// @Accept */*
+// @Produce json
+// @Param name query string false "State name for which covid data is required"
+// @Param latlng query string false "Latitude and longitude of user"
+// @Success 200 {object} map[string]interface{}
+// @Router /covid-data/state [get]
 func StateController(c echo.Context) error {
 	log.Instance.Debug("StateController is hit")
 
@@ -16,7 +27,9 @@ func StateController(c echo.Context) error {
 	var latLang []string
 
 	stateName = c.QueryParam("name")
-	latLang = strings.Split(c.QueryParam("latlng"), ",")
+
+	latLangQuery, _ := url.QueryUnescape(c.QueryParam("latlng"))
+	latLang = strings.Split(latLangQuery, ",")
 
 	if len(latLang) == 2 {
 		stateName = services.GetStateNameUsingLatAndLong(latLang)

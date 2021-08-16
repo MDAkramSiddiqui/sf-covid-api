@@ -3,7 +3,7 @@ package constants
 // Api Uri constants
 const (
 	CovidDataApi        = "https://www.mohfw.gov.in/data/datanew.json"
-	HereGeoCordinateApi = `https://revgeocode.search.hereapi.com/v1/revgeocode?at={{.LAT}}%2C{{.LONG}}&apiKey={{.API_KEY}}`
+	HereGeoCordinateApi = `https://revgeocode.search.hereapi.com/v1/revgeocode?at={{.LAT}},{{.LONG}}&apiKey={{.API_KEY}}`
 )
 
 // Environment Variables Key Constants
@@ -13,6 +13,7 @@ const (
 	MongoDBPassword = "MONGO_DB_PASSWORD"
 	MongoDBName     = "MONGO_DB_NAME"
 	HereGeoAPIKey   = "HERE_GEO_API_KEY"
+	Port            = "PORT"
 )
 
 // Severity levels.

@@ -1,0 +1,57 @@
+basePath: /api/v1/
+host: localhost:5000
+info:
+  contact:
+    email: support@swagger.io
+    name: API Support
+    url: http://www.swagger.io/support
+  description: This is a simple server for requesting covid data of state
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: SF-Covid-State Api
+  version: "1.0"
+paths:
+  /covid-data/state:
+    get:
+      consumes:
+      - '*/*'
+      description: Get statewise covid data either via using name or latitude and
+        longitude.
+      parameters:
+      - description: State name for which covid data is required
+        in: query
+        name: name
+        type: string
+      - description: Latitude and longitude of user
+        in: query
+        name: latlng
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Serves statewise covid data.
+      tags:
+      - root
+  /ping:
+    get:
+      consumes:
+      - '*/*'
+      description: Get the status of server.
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: ""
+      summary: Show the status of server.
+      tags:
+      - root
+schemes:
+- http
+swagger: "2.0"
