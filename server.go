@@ -32,7 +32,7 @@ func init() {
 
 	err := godotenv.Load()
 	if err != nil {
-		log.Instance.Err("Error while loading environment variables", err)
+		log.Instance.Err("Error while loading environment variables, err: %v", err.Error())
 	}
 
 	if os.Getenv(constants.Env) == constants.Production {
@@ -85,13 +85,13 @@ func main() {
 	go func() {
 		if err := e.Start(fmt.Sprintf(":%v", port)); err != nil {
 			if err != http.ErrServerClosed {
-				log.Instance.Fatal("Server start failed, shutting down server", err)
+				log.Instance.Fatal("Server start failed, shutting down server, err: %v", err.Error())
 			}
 			crons.StateDataCron.Stop()
 		}
 	}()
 
-	log.Instance.Info(fmt.Sprintf("Starting server at port %v", port))
+	log.Instance.Info("Starting server at port %v", port)
 	crons.StateDataCron.Start()
 
 	quit := make(chan os.Signal, 1)
@@ -100,7 +100,7 @@ func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	if err := e.Shutdown(ctx); err != nil {
-		log.Instance.Fatal("Shutting down server failed", err)
+		log.Instance.Fatal("Shutting down server failed, err: %v", err.Error())
 	} else {
 		log.Instance.Info("Server shut down successfully")
 	}

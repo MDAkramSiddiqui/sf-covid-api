@@ -3,7 +3,6 @@ package crons
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"os"
 	"time"
 
@@ -31,12 +30,12 @@ func init() {
 
 func (c *DataCron) Start() {
 	c.job.Start()
-	log.Instance.Info(fmt.Sprintf("%v job started successfully", c.name))
+	log.Instance.Info("%v job started successfully", c.name)
 }
 
 func (c *DataCron) Stop() {
 	c.job.Stop()
-	log.Instance.Info(fmt.Sprintf("%v job stopped successfully", c.name))
+	log.Instance.Info("%v job stopped successfully", c.name)
 }
 
 func updateCovidData() {

@@ -39,7 +39,7 @@ func GetRedisDriver() (*redis.Client, error) {
 		_, err := driver.Ping().Result()
 		if err != nil {
 			redisDriverInstanceError = err
-			log.Instance.Err("Unable to connect to redis", err)
+			log.Instance.Err("Unable to connect to redis, err: %v", err.Error())
 		} else {
 			log.Instance.Info("Redis connection made successfully")
 		}

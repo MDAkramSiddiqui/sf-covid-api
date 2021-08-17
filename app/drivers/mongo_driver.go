@@ -34,7 +34,7 @@ func GetMongoDriver() (*mongo.Client, error) {
 		driver, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(connectURI))
 		if err != nil {
 			mongoDriverInstanceError = err
-			log.Instance.Fatal("Unable to connect to database", err)
+			log.Instance.Fatal("Unable to connect to database, err: %v", err.Error())
 		}
 		err = driver.Ping(context.Background(), nil)
 		if err != nil {

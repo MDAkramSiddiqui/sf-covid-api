@@ -12,19 +12,19 @@ func GetRequest(url string) ([]byte, error) {
 
 	response, err := http.Get(url)
 	if err != nil {
-		log.Instance.Err("URL not found", err)
+		log.Instance.Err("URL not found, err: %v", err.Error())
 		return nil, err
 	}
 	defer response.Body.Close()
 
 	body, err := ioutil.ReadAll(response.Body)
 	if err != nil {
-		log.Instance.Err("Response not parsed", err)
+		log.Instance.Err("Response not parsed, err: %v", err.Error())
 		return nil, err
 	}
 
 	if response.StatusCode != 200 {
-		log.Instance.Err("Requested data fetch call failed", err)
+		log.Instance.Err("Requested data fetch call failed, err: %v", err.Error())
 		return nil, err
 	}
 

@@ -1,6 +1,7 @@
 package log
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"regexp"
@@ -34,7 +35,7 @@ func initialise() {
 			debug: log.New(os.Stderr, "[DEBUG]: ", logFlags),
 			info:  log.New(os.Stderr, "[INFO]: ", logFlags),
 			warn:  log.New(os.Stderr, "[WARN]: ", logFlags),
-			err:   log.New(os.Stderr, "[ERR]: ", logFlags),
+			err:   log.New(os.Stderr, "[ERROR]: ", logFlags),
 			fatal: log.New(os.Stderr, "[FATAL]: ", logFlags),
 		}
 	})
@@ -46,65 +47,62 @@ func (l *Logger) SetLogLevel(level int) {
 	l.level = level
 }
 
-func (l *Logger) Debug(message string) {
+// print info debug messages
+func (l *Logger) Debug(message string, args ...interface{}) {
 	if l.level > constants.Debug {
 		return
 	}
 
-	message = filterMessageForLog(message)
+	message = buildMessageForLog(message, args...)
 	l.debug.Println(message)
 }
 
-func (l *Logger) Info(message string) {
+// print info log messages
+func (l *Logger) Info(message string, args ...interface{}) {
 	if l.level > constants.Info {
 		return
 	}
 
-	message = filterMessageForLog(message)
+	message = buildMessageForLog(message, args...)
 	l.info.Println(message)
 }
 
-func (l *Logger) Warn(message string) {
+// print warn log messages
+func (l *Logger) Warn(message string, args ...interface{}) {
 	if l.level > constants.Warn {
 		return
 	}
 
-	message = filterMessageForLog(message)
+	message = buildMessageForLog(message, args...)
 	l.warn.Println(message)
 }
 
-func (l *Logger) Err(message string, err error) {
+// print error log messages
+func (l *Logger) Err(message string, args ...interface{}) {
 	if l.level > constants.Err {
 		return
 	}
 
-	message = filterMessageForLog(message)
-	if err != nil {
-		l.err.Printf("%v, err: %v", message, err.Error())
-		return
-	}
-
+	message = buildMessageForLog(message, args...)
 	l.err.Println(message)
 }
 
-func (l *Logger) Fatal(message string, err error) {
+// print fatal log messages and exit app with status 1
+func (l *Logger) Fatal(message string, args ...interface{}) {
 	if l.level > constants.Fatal {
 		return
 	}
 
-	message = filterMessageForLog(message)
-
-	if err != nil {
-		l.fatal.Printf("%v, err: %v", message, err.Error())
-	} else {
-		l.fatal.Println(message)
-	}
-
+	message = buildMessageForLog(message, args...)
+	l.fatal.Println(message)
 	os.Exit(1)
 }
 
-func filterMessageForLog(message string) string {
+// build messages for logs,
+// masks password keys and interpolates messages
+func buildMessageForLog(message string, args ...interface{}) string {
 	r := regexp.MustCompile(`/password[^,{}\]\[]*/gim`)
-	message = r.ReplaceAllString(message, "password:'********'")
+	message = r.ReplaceAllString(message, "password: ********")
+	message = fmt.Sprintf(message, args...)
 	return message
 }
