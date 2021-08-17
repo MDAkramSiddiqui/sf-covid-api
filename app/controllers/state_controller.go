@@ -39,7 +39,7 @@ func StateController(c echo.Context) error {
 	latLang = strings.Split(latLangQuery, ",")
 	latLang[0], latLang[1] = strings.TrimSpace(latLang[0]), strings.TrimSpace(latLang[1])
 
-	if len(latLang) == 2 {
+	if len(latLang) == 2 && len(latLang[0]) > 0 && len(latLang[1]) > 0 {
 		log.Instance.Info("Latitude and longitude provided are %v, %v", latLang[0], latLang[1])
 		stateName, _ = services.GetStateNameUsingLatAndLong(latLang)
 
