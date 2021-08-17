@@ -31,10 +31,7 @@ func GetStateCovidData(stateName string) ([]primitive.M, error) {
 	if redisDriverInstanceErr != nil {
 		log.Instance.Err("Redis instance is down using DB to fetch data, err: %v", redisDriverInstanceErr.Error())
 	} else {
-		result, err := redisDriverInstance.Get(stateName).Bytes()
-		if err != nil {
-			log.Instance.Err("Error while fetching data from redis for state %v, err: %v", stateName, err.Error())
-		}
+		result, _ := redisDriverInstance.Get(stateName).Bytes()
 
 		if len(result) == 0 {
 			isFoundInRedis = false
@@ -54,11 +51,16 @@ func GetStateCovidData(stateName string) ([]primitive.M, error) {
 
 	coll := mongoDriverInstance.Database(os.Getenv(constants.MongoDBName)).Collection("covid-state")
 
-	_ = coll.FindOne(
+	err = coll.FindOne(
 		context.TODO(),
 		bson.M{"name": stateName},
 		options.FindOne().SetProjection(bson.M{"_id": 0}),
 	).Decode(&data[0])
+
+	if err != nil {
+		log.Instance.Err("Error while fetching data from DB for state %v, err: %v", stateName, err.Error())
+		return data, err
+	}
 
 	log.Instance.Info("Data for state %v fetch from DB successfully", stateName)
 
@@ -87,10 +89,7 @@ func GetAllStateCovidData() ([]primitive.M, error) {
 	if redisDriverInstanceErr != nil {
 		log.Instance.Err("Redis instance is down using DB to fetch data, err: %v", redisDriverInstanceErr.Error())
 	} else {
-		result, err := redisDriverInstance.Get("AllStatesData").Bytes()
-		if err != nil {
-			log.Instance.Err("Error while fetching data from redis for all states, err: %v", err.Error())
-		}
+		result, _ := redisDriverInstance.Get("AllStatesData").Bytes()
 
 		if len(result) == 0 {
 			isFoundInRedis = false
