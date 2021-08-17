@@ -13,6 +13,7 @@ import (
 	"github.com/MDAkramSiddiqui/sf-covid-api/app/services"
 	"github.com/robfig/cron/v3"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
@@ -64,33 +65,46 @@ func updateCovidData() {
 		return
 	}
 
+	statesChan := make([]chan bool, len(covidStatesData))
+
 	for i := 0; i < len(covidStatesData); i++ {
-		stateName := covidStatesData[i].Name
-		if stateName == "" {
-			stateName = "India"
-		}
-
-		opts := options.FindOneAndReplace().SetUpsert(true)
-		filter := bson.M{"name": stateName}
-		replacement := bson.D{
-			{Key: "name", Value: stateName},
-			{Key: "positiveCases", Value: covidStatesData[i].PositiveCases},
-			{Key: "activeCases", Value: covidStatesData[i].ActiveCases},
-			{Key: "deathCases", Value: covidStatesData[i].DeathCases},
-			{Key: "curedCases", Value: covidStatesData[i].CuredCases},
-			{Key: "latestPositiveCases", Value: covidStatesData[i].LatestPositiveCases},
-			{Key: "latestActiveCases", Value: covidStatesData[i].LatestActiveCases},
-			{Key: "latestDeathCases", Value: covidStatesData[i].LatestDeathCases},
-			{Key: "latestCuredCases", Value: covidStatesData[i].LatestCuredCases},
-			{Key: "updatedAt", Value: time.Now()},
-		}
-
-		coll := mongoDriverInstance.Database(os.Getenv(constants.MongoDBName)).Collection("covid-state")
-		_ = coll.FindOneAndReplace(
-			context.TODO(),
-			filter,
-			replacement,
-			opts,
-		)
+		go updateStateData(&covidStatesData[i], mongoDriverInstance, statesChan[i])
 	}
+
+	for i := 0; i < len(statesChan); i++ {
+		<-statesChan[i]
+	}
+}
+
+func updateStateData(covidStateData *schema.TCovidState, mongoDriverInstance *mongo.Client, stateChan chan bool) {
+	stateName := covidStateData.Name
+	if stateName == "" {
+		stateName = "India"
+	}
+
+	opts := options.FindOneAndReplace().SetUpsert(true)
+	filter := bson.M{"name": stateName}
+	replacement := bson.D{
+		{Key: "name", Value: stateName},
+		{Key: "positiveCases", Value: covidStateData.PositiveCases},
+		{Key: "activeCases", Value: covidStateData.ActiveCases},
+		{Key: "deathCases", Value: covidStateData.DeathCases},
+		{Key: "curedCases", Value: covidStateData.CuredCases},
+		{Key: "latestPositiveCases", Value: covidStateData.LatestPositiveCases},
+		{Key: "latestActiveCases", Value: covidStateData.LatestActiveCases},
+		{Key: "latestDeathCases", Value: covidStateData.LatestDeathCases},
+		{Key: "latestCuredCases", Value: covidStateData.LatestCuredCases},
+		{Key: "updatedAt", Value: time.Now()},
+	}
+
+	coll := mongoDriverInstance.Database(os.Getenv(constants.MongoDBName)).Collection("covid-state")
+	_ = coll.FindOneAndReplace(
+		context.TODO(),
+		filter,
+		replacement,
+		opts,
+	)
+
+	log.Instance.Debug("Data for state %v updated successfully", covidStateData.Name)
+	stateChan <- true
 }
