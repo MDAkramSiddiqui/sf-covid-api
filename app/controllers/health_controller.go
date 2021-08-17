@@ -19,5 +19,5 @@ import (
 func HealthController(c echo.Context) error {
 	log.Instance.Debug("HealthController is hit")
 
-	return c.JSON(http.StatusOK, response_model.DefaultResponse(http.StatusOK, "pong"))
+	return c.JSON(response_model.DefaultResponse(http.StatusOK, "pong"))
 }

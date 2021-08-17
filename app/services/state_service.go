@@ -19,10 +19,10 @@ import (
 )
 
 // Fetches a single state covid data from DB using provided state name or coordinates
-func GetStateCovidData(stateName string) primitive.M {
+func GetStateCovidData(stateName string) ([]primitive.M, error) {
 	log.Instance.Debug("GetStateCovidData is hit")
 
-	var data bson.M
+	var data = make([]bson.M, 1)
 	isFoundInRedis := true
 
 	stateName = strings.Title(strings.ToLower(strings.TrimSpace(strings.Trim(stateName, "\""))))
@@ -40,16 +40,16 @@ func GetStateCovidData(stateName string) primitive.M {
 			isFoundInRedis = false
 			log.Instance.Info("Data for state: %v not found in redis requesting from DB", stateName)
 		} else {
-			json.Unmarshal(result, &data)
+			json.Unmarshal(result, &data[0])
 			log.Instance.Info("Data for state: %v found in redis", stateName)
-			return data
+			return data, nil
 		}
 	}
 
-	mongoDriverInstance, mongoDriverInstanceErr := drivers.GetMongoDriver()
-	if mongoDriverInstanceErr != nil {
-		log.Instance.Err("DB is down, err: %v", stateName, mongoDriverInstanceErr.Error())
-		return data
+	mongoDriverInstance, err := drivers.GetMongoDriver()
+	if err != nil {
+		log.Instance.Err("DB is down, err: %v", stateName, err.Error())
+		return data, err
 	}
 
 	coll := mongoDriverInstance.Database(os.Getenv(constants.MongoDBName)).Collection("covid-state")
@@ -58,13 +58,13 @@ func GetStateCovidData(stateName string) primitive.M {
 		context.TODO(),
 		bson.M{"name": stateName},
 		options.FindOne().SetProjection(bson.M{"_id": 0}),
-	).Decode(&data)
+	).Decode(&data[0])
 
 	log.Instance.Info("Data for state %v fetch from DB successfully", stateName)
 
 	// Save data into redis if fetched from DB
 	if !isFoundInRedis {
-		redisData, _ := json.Marshal(data)
+		redisData, _ := json.Marshal(data[0])
 		err := redisDriverInstance.Set(stateName, redisData, constants.RedisTTL).Err()
 		if err != nil {
 			log.Instance.Err("Error while saving data in redis for state %v, err: %v", stateName, err.Error())
@@ -73,11 +73,11 @@ func GetStateCovidData(stateName string) primitive.M {
 		}
 	}
 
-	return data
+	return data, nil
 }
 
 // Fetches all state covid data from DB if state name or coordinates not provided
-func GetAllStateCovidData() []primitive.M {
+func GetAllStateCovidData() ([]primitive.M, error) {
 	log.Instance.Debug("GetAllStateCovidData is hit")
 
 	var data []bson.M
@@ -98,27 +98,27 @@ func GetAllStateCovidData() []primitive.M {
 		} else {
 			json.Unmarshal(result, &data)
 			log.Instance.Info("All states data found in redis")
-			return data
+			return data, nil
 		}
 	}
 
 	mongoDriverInstance, err := drivers.GetMongoDriver()
 	if err != nil {
 		log.Instance.Err("DB is down, err: %v", err.Error())
-		return data
+		return data, err
 	}
 
 	coll := mongoDriverInstance.Database(os.Getenv(constants.MongoDBName)).Collection("covid-state")
 	cursor, err := coll.Find(context.TODO(), bson.M{}, options.Find().SetProjection(bson.M{"_id": 0}))
 	if err != nil {
 		log.Instance.Err("Error while fetching data from DB, err %v", err.Error())
-		return data
+		return data, err
 	}
 
 	err = cursor.All(context.TODO(), &data)
 	if err != nil {
 		log.Instance.Err("Error while reading converting data from DB, err %v", err.Error())
-		return data
+		return data, err
 	}
 
 	log.Instance.Info("Data for all states fetch from DB successfully")
@@ -127,7 +127,7 @@ func GetAllStateCovidData() []primitive.M {
 	if !isFoundInRedis {
 		redisData, err := json.Marshal(data)
 		if err != nil {
-			log.Instance.Err("Error while converting data, err %v", err.Error())
+			log.Instance.Err("Error while converting data for saving into redis, err %v", err.Error())
 		}
 
 		err = redisDriverInstance.Set("AllStatesData", redisData, constants.RedisTTL).Err()
@@ -138,25 +138,26 @@ func GetAllStateCovidData() []primitive.M {
 		}
 	}
 
-	return data
+	return data, nil
 }
 
 // Fetches all states covid data from 3rd party API, used by cronjob to sync DB
-func GetAllStateCovidDataGovtApi() []byte {
+func GetAllStateCovidDataGovtApi() ([]byte, error) {
 	log.Instance.Debug("GetAllStateCovidDataGovtApi is hit")
 
 	body, err := utils.GetRequest(constants.CovidDataApi)
 	if err != nil {
 		log.Instance.Err("Data fetch failed from 3rd party API, err: %v", err.Error())
+		return body, err
 	} else {
 		log.Instance.Info("Data fetch successfully from 3rd party API")
 	}
 
-	return body
+	return body, nil
 }
 
 // Determines state using provided coordinates if found else return empty string
-func GetStateNameUsingLatAndLong(latLang []string) string {
+func GetStateNameUsingLatAndLong(latLang []string) (string, error) {
 	log.Instance.Debug("GetStateNameUsingLatAndLong is hit")
 
 	var stateName string
@@ -176,7 +177,7 @@ func GetStateNameUsingLatAndLong(latLang []string) string {
 	response, err := utils.GetRequest(url)
 	if err != nil {
 		log.Instance.Err("State name request failed from 3rd party API for coordinates %v, %v, err: %v", latLang[0], latLang[1], err.Error())
-		return stateName
+		return stateName, err
 	}
 
 	json.Unmarshal(response, &stateData)
@@ -190,9 +191,7 @@ func GetStateNameUsingLatAndLong(latLang []string) string {
 		} else {
 			log.Instance.Info("State %v is located for coordinates %v, %v", stateName, latLang[0], latLang[1])
 		}
-
-		return stateName
 	}
 
-	return stateName
+	return stateName, nil
 }

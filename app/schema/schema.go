@@ -32,6 +32,7 @@ type TCovidStateItems struct {
 
 // schema for default response model
 type TDefaultResponse struct {
-	Status string      `json:"status"`
-	Data   interface{} `json:"data"`
+	Status  string      `json:"status"`
+	Data    interface{} `json:"data"`
+	Message interface{} `json:"message"`
 }

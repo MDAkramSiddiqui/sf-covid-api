@@ -45,11 +45,16 @@ func updateCovidData() {
 
 	var covidStatesData []schema.TCovidState
 
-	data := services.GetAllStateCovidDataGovtApi()
+	data, err := services.GetAllStateCovidDataGovtApi()
+	if err != nil {
+		log.Instance.Err("Error while fetching all states data from 3rd party API, err: %v", err.Error())
+		return
+	}
+
 	json.Unmarshal(data, &covidStatesData)
 
-	mongoDriverInstance, mongoDriverInstanceErr := drivers.GetMongoDriver()
-	if mongoDriverInstanceErr != nil {
+	mongoDriverInstance, err := drivers.GetMongoDriver()
+	if err != nil {
 		return
 	}
 
