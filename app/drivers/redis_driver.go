@@ -16,7 +16,7 @@ Initialized and exposed through  GetRedisDriver().*/
 var redisDriverInstance *redis.Client
 
 //Used during creation of singleton client object in GetRedisDriver().
-var redisDriverInstanceError error
+var redisDriverInstanceError error = nil
 
 //Used to execute client creation procedure only once.
 var redisOnce sync.Once

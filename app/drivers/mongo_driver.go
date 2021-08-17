@@ -17,7 +17,7 @@ Initialized and exposed through  GetMongoDriver().*/
 var mongoDriverInstance *mongo.Client
 
 //Used during creation of singleton client object in GetMongoDriver().
-var mongoDriverInstanceError error
+var mongoDriverInstanceError error = nil
 
 //Used to execute client creation procedure only once.
 var mongoOnce sync.Once
@@ -26,7 +26,6 @@ var mongoOnce sync.Once
 func GetMongoDriver() (*mongo.Client, error) {
 	log.Instance.Debug("GetMongoDriver is hit")
 
-	mongoDriverInstanceError = nil
 	//Perform connection creation operation only once.
 	mongoOnce.Do(func() {
 
