@@ -10,17 +10,18 @@ const (
 
 // Environment Variables Key Constants
 const (
-	Env             = "ENV"
-	MongoDBUrl      = "MONGO_DB_URL"
-	MongoDBPassword = "MONGO_DB_PASSWORD"
-	MongoDBName     = "MONGO_DB_NAME"
-	HereGeoAPIKey   = "HERE_GEO_API_KEY"
-	Port            = "PORT"
-	RedisPort       = "REDIS_PORT"
-	RedisHost       = "REDIS_HOST"
-	RedisDB         = "REDIS_DB"
-	RedisPassword   = "REDIS_PASSWORD"
-	LogLevel        = "LOG_LEVEL"
+	Env                 = "ENV"
+	MongoDBUrl          = "MONGO_DB_URL"
+	MongoDBPassword     = "MONGO_DB_PASSWORD"
+	MongoDBName         = "MONGO_DB_NAME"
+	HereGeoAPIKey       = "HERE_GEO_API_KEY"
+	Port                = "PORT"
+	RedisPort           = "REDIS_PORT"
+	RedisHost           = "REDIS_HOST"
+	RedisDB             = "REDIS_DB"
+	RedisPassword       = "REDIS_PASSWORD"
+	LogLevel            = "LOG_LEVEL"
+	StateDataCronPeriod = "STATE_DATA_CRON"
 )
 
 // Severity levels.
@@ -38,6 +39,8 @@ const (
 	Production  = "PRODUCTION"
 )
 
+// Some default parameters
 const (
-	RedisTTL = time.Minute * 30
+	DefaultRedisTTL            = time.Minute * 30
+	DefaultStateDataCronPeriod = "*/30 * * * *"
 )

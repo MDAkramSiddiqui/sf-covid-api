@@ -63,6 +63,8 @@ func init() {
 
 	<-mongoConnectionChan
 	<-redisConnectionChan
+
+	crons.Init()
 }
 
 // @title SF-Covid-State Api

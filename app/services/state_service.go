@@ -67,7 +67,7 @@ func GetStateCovidData(stateName string) ([]primitive.M, error) {
 	// Save data into redis if fetched from DB
 	if !isFoundInRedis {
 		redisData, _ := json.Marshal(data[0])
-		err := redisDriverInstance.Set(stateName, redisData, constants.RedisTTL).Err()
+		err := redisDriverInstance.Set(stateName, redisData, constants.DefaultRedisTTL).Err()
 		if err != nil {
 			log.Instance.Err("Error while saving data in redis for state %v, err: %v", stateName, err.Error())
 		} else {
@@ -129,7 +129,7 @@ func GetAllStateCovidData() ([]primitive.M, error) {
 			log.Instance.Err("Error while converting data for saving into redis, err %v", err.Error())
 		}
 
-		err = redisDriverInstance.Set("AllStatesData", redisData, constants.RedisTTL).Err()
+		err = redisDriverInstance.Set("AllStatesData", redisData, constants.DefaultRedisTTL).Err()
 		if err != nil {
 			log.Instance.Err("Error while saving all states data in redis, err: %v", err.Error())
 		} else {

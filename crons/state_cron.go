@@ -23,9 +23,15 @@ type DataCron struct {
 
 var StateDataCron *DataCron
 
-func init() {
+func Init() {
+	stateCronPeriod := constants.DefaultStateDataCronPeriod
+	if os.Getenv(constants.StateDataCronPeriod) != "" {
+		log.Instance.Info("State cronjob period changed from default %v to %v", stateCronPeriod, os.Getenv(constants.StateDataCronPeriod))
+		stateCronPeriod = os.Getenv(constants.StateDataCronPeriod)
+	}
+
 	StateDataCron = &DataCron{"StateDataCron", cron.New()}
-	StateDataCron.job.AddFunc("*/30 * * * *", updateCovidData)
+	StateDataCron.job.AddFunc(stateCronPeriod, updateCovidData)
 }
 
 func (c *DataCron) Start() {
