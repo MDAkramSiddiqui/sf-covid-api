@@ -13,6 +13,7 @@ import (
 	"github.com/MDAkramSiddiqui/sf-covid-api/app/controllers"
 	"github.com/MDAkramSiddiqui/sf-covid-api/app/drivers"
 	"github.com/MDAkramSiddiqui/sf-covid-api/app/log"
+	"github.com/MDAkramSiddiqui/sf-covid-api/app/response_model"
 	"github.com/MDAkramSiddiqui/sf-covid-api/crons"
 	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
@@ -67,6 +68,16 @@ func init() {
 	crons.Init()
 }
 
+// custom http error handler
+func customHTTPErrorHandler(err error, c echo.Context) {
+	code := http.StatusInternalServerError
+	if he, ok := err.(*echo.HTTPError); ok {
+		code = he.Code
+	}
+	log.Instance.Err("Some internal error happened, err: %v", err.Error())
+	c.JSON(response_model.DefaultResponse(code, nil))
+}
+
 // @title SF-Covid-State Api
 // @version 1.0
 // @description This is a simple server for requesting covid data of state
@@ -83,6 +94,9 @@ func init() {
 // @schemes https http
 func main() {
 	e := echo.New()
+
+	// Set custom http error handler
+	e.HTTPErrorHandler = customHTTPErrorHandler
 
 	// middlewares
 	e.Use(middleware.LoggerWithConfig(DefaultLoggerConfig))
