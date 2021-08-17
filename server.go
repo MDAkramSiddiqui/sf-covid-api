@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strconv"
 	"time"
 
 	"github.com/MDAkramSiddiqui/sf-covid-api/app/constants"
@@ -35,7 +36,14 @@ func init() {
 		log.Instance.Err("Error while loading environment variables, err: %v", err.Error())
 	}
 
-	if os.Getenv(constants.Env) == constants.Production {
+	if os.Getenv(constants.LogLevel) != "" {
+		logLevel, err := strconv.Atoi(os.Getenv(constants.LogLevel))
+		if err != nil || logLevel < constants.DebugLevel || logLevel > constants.FatalLevel {
+			log.Instance.Fatal("Invalid log level provided")
+		}
+		log.Instance.SetLogLevel(logLevel)
+
+	} else if os.Getenv(constants.Env) == constants.Production {
 		log.Instance.SetLogLevel(constants.ErrLevel)
 	} else {
 		log.Instance.SetLogLevel(constants.DebugLevel)

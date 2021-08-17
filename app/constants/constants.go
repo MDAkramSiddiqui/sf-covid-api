@@ -20,6 +20,7 @@ const (
 	RedisHost       = "REDIS_HOST"
 	RedisDB         = "REDIS_DB"
 	RedisPassword   = "REDIS_PASSWORD"
+	LogLevel        = "LOG_LEVEL"
 )
 
 // Severity levels.
