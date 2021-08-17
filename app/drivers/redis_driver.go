@@ -11,7 +11,7 @@ import (
 	"github.com/go-redis/redis"
 )
 
-/* Used to create a singleton object of MongoDB client.
+/* Used to create a singleton object of Redis client.
 Initialized and exposed through  GetRedisDriver().*/
 var redisDriverInstance *redis.Client
 
@@ -25,7 +25,6 @@ var redisOnce sync.Once
 func GetRedisDriver() (*redis.Client, error) {
 	log.Instance.Debug("GetRedisDriver is hit")
 
-	// redisDriverInstanceError = nil
 	//Perform connection creation operation only once.
 	redisOnce.Do(func() {
 

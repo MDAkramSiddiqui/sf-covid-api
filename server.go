@@ -41,8 +41,20 @@ func init() {
 		log.Instance.SetLogLevel(constants.DebugLevel)
 	}
 
-	drivers.GetMongoDriver()
-	drivers.GetRedisDriver()
+	mongoConnectionChan := make(chan bool)
+	redisConnectionChan := make(chan bool)
+	go func(mongoConnectionChan chan bool) {
+		drivers.GetMongoDriver()
+		mongoConnectionChan <- true
+	}(mongoConnectionChan)
+
+	go func(redisConnectionChan chan bool) {
+		drivers.GetRedisDriver()
+		redisConnectionChan <- true
+	}(redisConnectionChan)
+
+	<-mongoConnectionChan
+	<-redisConnectionChan
 }
 
 // @title SF-Covid-State Api
@@ -79,6 +91,7 @@ func main() {
 	port := os.Getenv(constants.Port)
 	if port == "" {
 		port = "5000"
+		log.Instance.Info("Server port not provided, using default port")
 	}
 
 	// Start server

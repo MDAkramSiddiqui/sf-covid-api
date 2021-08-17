@@ -38,6 +38,8 @@ func (c *DataCron) Stop() {
 	log.Instance.Info("%v job stopped successfully", c.name)
 }
 
+// cronjob for periodically fetching and updating covid data of different states
+// from 3rd party API
 func updateCovidData() {
 	log.Instance.Debug("updateCovidData is hit")
 
@@ -46,8 +48,8 @@ func updateCovidData() {
 	data := services.GetAllStateCovidDataGovtApi()
 	json.Unmarshal(data, &covidStatesData)
 
-	mongoDriverInstance, err := drivers.GetMongoDriver()
-	if err != nil {
+	mongoDriverInstance, mongoDriverInstanceErr := drivers.GetMongoDriver()
+	if mongoDriverInstanceErr != nil {
 		return
 	}
 

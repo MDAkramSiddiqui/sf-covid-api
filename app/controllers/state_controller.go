@@ -28,21 +28,26 @@ func StateController(c echo.Context) error {
 	var latLang []string
 
 	stateName = c.QueryParam("name")
+	if stateName == "" {
+		log.Instance.Info("State name is not provided")
+	}
 
 	latLangQuery, _ := url.QueryUnescape(c.QueryParam("latlng"))
 	latLang = strings.Split(latLangQuery, ",")
 
 	if len(latLang) == 2 {
+		log.Instance.Info("Latitude and longitude provided are %v, %v", latLang[0], latLang[1])
 		stateName = services.GetStateNameUsingLatAndLong(latLang)
 	} else {
-		log.Instance.Warn("Latitude and longitude invalid or not provided")
+		log.Instance.Info("Latitude and longitude are not provided or invalid")
 	}
 
 	if stateName == "" {
-		log.Instance.Warn("State name not provided")
+		log.Instance.Info("Cannot determine requested state, therefore fetching all states covid data")
 		val := services.GetAllStateCovidData()
 		return c.JSON(http.StatusOK, response_model.DefaultResponse(http.StatusOK, val))
 	}
+
 	resp := services.GetStateCovidData(stateName)
 	return c.JSON(http.StatusOK, response_model.DefaultResponse(http.StatusOK, resp))
 }

@@ -7,6 +7,7 @@ import (
 	"github.com/MDAkramSiddiqui/sf-covid-api/app/log"
 )
 
+// Wrapper for making get request and returns correspoing results and errors
 func GetRequest(url string) ([]byte, error) {
 	log.Instance.Debug("GetRequest is hit")
 
