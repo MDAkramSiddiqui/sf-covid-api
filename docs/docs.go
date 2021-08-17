@@ -54,7 +54,7 @@ var doc = `{
                     },
                     {
                         "type": "string",
-                        "description": "Latitude and longitude of user",
+                        "description": "Latitude and longitude of user, eg. latlng=23.223,23.222",
                         "name": "latlng",
                         "in": "query"
                     }
