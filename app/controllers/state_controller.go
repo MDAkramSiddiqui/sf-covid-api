@@ -37,6 +37,7 @@ func StateController(c echo.Context) error {
 
 	latLangQuery, _ := url.QueryUnescape(c.QueryParam("latlng"))
 	latLang = strings.Split(latLangQuery, ",")
+	latLang[0], latLang[1] = strings.TrimSpace(latLang[0]), strings.TrimSpace(latLang[1])
 
 	if len(latLang) == 2 {
 		log.Instance.Info("Latitude and longitude provided are %v, %v", latLang[0], latLang[1])
