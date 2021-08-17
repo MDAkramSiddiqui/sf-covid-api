@@ -36,9 +36,9 @@ func init() {
 	}
 
 	if os.Getenv(constants.Env) == constants.Production {
-		log.Instance.SetLogLevel(3)
+		log.Instance.SetLogLevel(constants.ErrLevel)
 	} else {
-		log.Instance.SetLogLevel(0)
+		log.Instance.SetLogLevel(constants.DebugLevel)
 	}
 
 	drivers.GetMongoDriver()

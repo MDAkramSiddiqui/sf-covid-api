@@ -24,11 +24,11 @@ const (
 
 // Severity levels.
 const (
-	Debug int = iota
-	Info
-	Warn
-	Err
-	Fatal
+	DebugLevel int = iota
+	InfoLevel
+	WarnLevel
+	ErrLevel
+	FatalLevel
 )
 
 // Possible App Environments

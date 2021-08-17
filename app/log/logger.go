@@ -39,7 +39,7 @@ func initialise() {
 			fatal: log.New(os.Stderr, "[FATAL]: ", logFlags),
 		}
 	})
-	Instance.level = constants.Err
+	Instance.level = constants.ErrLevel
 	Instance.initialised = true
 }
 
@@ -49,7 +49,7 @@ func (l *Logger) SetLogLevel(level int) {
 
 // print info debug messages
 func (l *Logger) Debug(message string, args ...interface{}) {
-	if l.level > constants.Debug {
+	if l.level > constants.DebugLevel {
 		return
 	}
 
@@ -59,7 +59,7 @@ func (l *Logger) Debug(message string, args ...interface{}) {
 
 // print info log messages
 func (l *Logger) Info(message string, args ...interface{}) {
-	if l.level > constants.Info {
+	if l.level > constants.InfoLevel {
 		return
 	}
 
@@ -69,7 +69,7 @@ func (l *Logger) Info(message string, args ...interface{}) {
 
 // print warn log messages
 func (l *Logger) Warn(message string, args ...interface{}) {
-	if l.level > constants.Warn {
+	if l.level > constants.WarnLevel {
 		return
 	}
 
@@ -79,7 +79,7 @@ func (l *Logger) Warn(message string, args ...interface{}) {
 
 // print error log messages
 func (l *Logger) Err(message string, args ...interface{}) {
-	if l.level > constants.Err {
+	if l.level > constants.ErrLevel {
 		return
 	}
 
@@ -89,7 +89,7 @@ func (l *Logger) Err(message string, args ...interface{}) {
 
 // print fatal log messages and exit app with status 1
 func (l *Logger) Fatal(message string, args ...interface{}) {
-	if l.level > constants.Fatal {
+	if l.level > constants.FatalLevel {
 		return
 	}
 
