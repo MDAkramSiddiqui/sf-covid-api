@@ -66,14 +66,14 @@ func StateController(c echo.Context) error {
 	if dataByStateName.Err.Err != nil {
 		return c.JSON(response_model.DefaultResponse(dataByStateName.Err.StatusCode, dataByStateName.Err.Message(), true))
 	} else if dataByStateName.Result != nil {
-		log.Instance.Info("Covid data by state name found, appending to response")
+		log.Instance.Info("Data by state name found, appending to response")
 		responseData = append(responseData, dataByStateName.Result)
 	}
 
 	if dataByCoordinate.Err.Err != nil {
 		return c.JSON(response_model.DefaultResponse(dataByCoordinate.Err.StatusCode, dataByCoordinate.Err.Message(), true))
 	} else if dataByCoordinate.Result != nil {
-		log.Instance.Info("Covid data by coordinates found, appending to response")
+		log.Instance.Info("Data by coordinates found, appending to response")
 		responseData = append(responseData, dataByCoordinate.Result)
 	}
 
