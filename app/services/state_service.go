@@ -48,7 +48,7 @@ func GetCovidDataByName(stateName string) (primitive.M, *utils.CustomErr) {
 	} else {
 		redisResult, _ := redisDriverInstance.Get(stateName).Bytes()
 
-		if len(result) == 0 {
+		if len(redisResult) == 0 {
 			isFoundInRedis = false
 			log.Instance.Info("Data for state: %v not found in redis requesting from DB", stateName)
 		} else {
@@ -146,7 +146,7 @@ func GetAllStateCovidData() ([]primitive.M, *utils.CustomErr) {
 	} else {
 		redisResult, _ := redisDriverInstance.Get("AllStatesData").Bytes()
 
-		if len(result) == 0 {
+		if len(redisResult) == 0 {
 			isFoundInRedis = false
 			log.Instance.Info("All states data not found in redis requesting from DB")
 		} else {
