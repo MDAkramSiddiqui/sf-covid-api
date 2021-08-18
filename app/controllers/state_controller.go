@@ -7,9 +7,16 @@ import (
 	"github.com/MDAkramSiddiqui/sf-covid-api/app/log"
 	"github.com/MDAkramSiddiqui/sf-covid-api/app/response_model"
 	"github.com/MDAkramSiddiqui/sf-covid-api/app/services"
+	"github.com/MDAkramSiddiqui/sf-covid-api/app/utils"
 	"github.com/labstack/echo/v4"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
+
+type customStateChannel struct {
+	Result primitive.M
+	Err    *utils.CustomErr
+}
 
 // Statewise Covid Data Doc godoc
 // @Summary Serves statewise covid data.
@@ -35,22 +42,39 @@ func StateController(c echo.Context) error {
 	log.Instance.Debug("Raw state name provided is %v", stateName)
 	log.Instance.Debug("Raw coordinates provided are %v", latLangQuery)
 
+	dataByStateName := &customStateChannel{}
+	dataByCoordinate := &customStateChannel{}
+
+	dataByStateNamechan := make(chan bool)
+	dataByCoordinateChan := make(chan bool)
+
 	// get data via state name
-	dataByStateNameResult, dataByStateNameErr := services.GetCovidDataByName(stateName)
-	if dataByStateNameErr.Err != nil {
-		return c.JSON(response_model.DefaultResponse(dataByStateNameErr.StatusCode, dataByStateNameErr.Message(), true))
-	} else if dataByStateNameResult != nil {
-		log.Instance.Info("Covid data by state name found, appending to response")
-		responseData = append(responseData, dataByStateNameResult)
-	}
+	go func(dataByStateName *customStateChannel, dataByStateNamechan chan bool) {
+		dataByStateName.Result, dataByStateName.Err = services.GetCovidDataByName(stateName)
+		dataByStateNamechan <- true
+	}(dataByStateName, dataByStateNamechan)
 
 	// get data via coordinates
-	dataByCoordinatesResult, dataByCoordinatesErr := services.GetCovidDataByCoordinates(latLangQuery)
-	if dataByCoordinatesErr.Err != nil {
-		return c.JSON(response_model.DefaultResponse(dataByCoordinatesErr.StatusCode, dataByCoordinatesErr.Message(), true))
-	} else if dataByCoordinatesResult != nil {
+	go func(dataByCoordinate *customStateChannel, dataByCoordinateChan chan bool) {
+		dataByCoordinate.Result, dataByCoordinate.Err = services.GetCovidDataByCoordinates(latLangQuery)
+		dataByCoordinateChan <- true
+	}(dataByCoordinate, dataByCoordinateChan)
+
+	<-dataByStateNamechan
+	<-dataByCoordinateChan
+
+	if dataByStateName.Err.Err != nil {
+		return c.JSON(response_model.DefaultResponse(dataByStateName.Err.StatusCode, dataByStateName.Err.Message(), true))
+	} else if dataByStateName.Result != nil {
+		log.Instance.Info("Covid data by state name found, appending to response")
+		responseData = append(responseData, dataByStateName.Result)
+	}
+
+	if dataByCoordinate.Err.Err != nil {
+		return c.JSON(response_model.DefaultResponse(dataByCoordinate.Err.StatusCode, dataByCoordinate.Err.Message(), true))
+	} else if dataByCoordinate.Result != nil {
 		log.Instance.Info("Covid data by coordinates found, appending to response")
-		responseData = append(responseData, dataByCoordinatesResult)
+		responseData = append(responseData, dataByCoordinate.Result)
 	}
 
 	// fetch all states data if none query params are provided
@@ -59,7 +83,7 @@ func StateController(c echo.Context) error {
 
 		allStatesData, allStatesDataErr := services.GetAllStateCovidData()
 		if allStatesDataErr.Err != nil {
-			return c.JSON(response_model.DefaultResponse(dataByCoordinatesErr.StatusCode, dataByCoordinatesErr.Message(), true))
+			return c.JSON(response_model.DefaultResponse(allStatesDataErr.StatusCode, allStatesDataErr.Message(), true))
 		} else {
 			responseData = allStatesData
 		}
