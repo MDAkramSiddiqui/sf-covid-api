@@ -37,11 +37,16 @@ func StateController(c echo.Context) error {
 
 	latLangQuery, _ := url.QueryUnescape(c.QueryParam("latlng"))
 	latLang = strings.Split(latLangQuery, ",")
-	latLang[0], latLang[1] = strings.TrimSpace(latLang[0]), strings.TrimSpace(latLang[1])
 
-	if len(latLang) == 2 && len(latLang[0]) > 0 && len(latLang[1]) > 0 {
-		log.Instance.Info("Latitude and longitude provided are %v, %v", latLang[0], latLang[1])
-		stateName, _ = services.GetStateNameUsingLatAndLong(latLang)
+	if len(latLang) == 2 {
+		latLang[0], latLang[1] = strings.TrimSpace(latLang[0]), strings.TrimSpace(latLang[1])
+
+		if len(latLang[0]) > 0 && len(latLang[1]) > 0 {
+			log.Instance.Info("Latitude and longitude provided are %v, %v", latLang[0], latLang[1])
+			stateName, _ = services.GetStateNameUsingLatAndLong(latLang)
+		} else {
+			log.Instance.Info("Latitude and longitude are invalid")
+		}
 
 	} else {
 		log.Instance.Info("Latitude and longitude are not provided or invalid")

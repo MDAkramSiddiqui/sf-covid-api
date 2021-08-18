@@ -65,18 +65,12 @@ func updateCovidData() {
 		return
 	}
 
-	statesChan := make([]chan bool, len(covidStatesData))
-
 	for i := 0; i < len(covidStatesData); i++ {
-		go updateStateData(&covidStatesData[i], mongoDriverInstance, statesChan[i])
-	}
-
-	for i := 0; i < len(statesChan); i++ {
-		<-statesChan[i]
+		go updateStateData(&covidStatesData[i], mongoDriverInstance)
 	}
 }
 
-func updateStateData(covidStateData *schema.TCovidState, mongoDriverInstance *mongo.Client, stateChan chan bool) {
+func updateStateData(covidStateData *schema.TCovidState, mongoDriverInstance *mongo.Client) {
 	stateName := covidStateData.Name
 	if stateName == "" {
 		stateName = "India"
@@ -105,6 +99,5 @@ func updateStateData(covidStateData *schema.TCovidState, mongoDriverInstance *mo
 		opts,
 	)
 
-	log.Instance.Debug("Data for state %v updated successfully", covidStateData.Name)
-	stateChan <- true
+	log.Instance.Debug("Data for %v updated successfully", stateName)
 }

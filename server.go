@@ -124,7 +124,6 @@ func main() {
 			if err != http.ErrServerClosed {
 				log.Instance.Fatal("Server start failed, shutting down server, err: %v", err.Error())
 			}
-			crons.StateDataCron.Stop()
 		}
 	}()
 
@@ -134,6 +133,43 @@ func main() {
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, os.Interrupt)
 	<-quit
+
+	// Stop Cron job
+	crons.StateDataCron.Stop()
+
+	// close connections with DB and redis
+	mongoConnectionChan := make(chan bool)
+	redisConnectionChan := make(chan bool)
+
+	mongoDriverInstance, mongoDriverInstanceErr := drivers.GetMongoDriver()
+	if mongoDriverInstance != nil && mongoDriverInstanceErr == nil {
+		go func(mongoConnectionChan chan bool) {
+			err := mongoDriverInstance.Disconnect(context.TODO())
+			if err != nil {
+				log.Instance.Err("Error while closing connection with DB, err: %v", err.Error())
+			} else {
+				log.Instance.Info("Connection with DB closed successfully")
+			}
+			mongoConnectionChan <- true
+		}(mongoConnectionChan)
+	}
+
+	redisDriverInstance, redisDriverInstanceErr := drivers.GetRedisDriver()
+	if redisDriverInstance != nil && redisDriverInstanceErr == nil {
+		go func(redisConnectionChan chan bool) {
+			err := redisDriverInstance.Close()
+			if err != nil {
+				log.Instance.Err("Error while closing connection with redis, err: %v", err.Error())
+			} else {
+				log.Instance.Info("Connection with redis closed successfully")
+			}
+			redisConnectionChan <- true
+		}(redisConnectionChan)
+	}
+
+	<-mongoConnectionChan
+	<-redisConnectionChan
+
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	if err := e.Shutdown(ctx); err != nil {
