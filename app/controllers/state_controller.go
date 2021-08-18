@@ -3,14 +3,20 @@ package controllers
 import (
 	"net/http"
 	"net/url"
-	"strings"
 
 	"github.com/MDAkramSiddiqui/sf-covid-api/app/log"
 	"github.com/MDAkramSiddiqui/sf-covid-api/app/response_model"
 	"github.com/MDAkramSiddiqui/sf-covid-api/app/services"
+	"github.com/MDAkramSiddiqui/sf-covid-api/app/utils"
 	"github.com/labstack/echo/v4"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
+
+type tCustomResponse struct {
+	Result primitive.M
+	Err    *utils.CustomErr
+}
 
 // Statewise Covid Data Doc godoc
 // @Summary Serves statewise covid data.
@@ -26,46 +32,61 @@ func StateController(c echo.Context) error {
 	log.Instance.Debug("StateController is hit")
 
 	var stateName string
-	var latLang []string
-	var err error
-	var resp []bson.M
+	var latLangQuery string
+	var responseData []bson.M
 
 	stateName = c.QueryParam("name")
-	if stateName == "" {
-		log.Instance.Info("State name is not provided")
+	latLangQuery, _ = url.QueryUnescape(c.QueryParam("latlng"))
+
+	log.Instance.Debug("Raw state name provided is %v", stateName)
+	log.Instance.Debug("Raw coordinates provided are %v", latLangQuery)
+
+	dataByStateName := &tCustomResponse{}
+	dataByCoordinate := &tCustomResponse{}
+
+	dataByStateNameChan := make(chan bool)
+	dataByCoordinateChan := make(chan bool)
+
+	// get data via state name
+	go func(dataByStateName *tCustomResponse, dataByStateNameChan chan bool) {
+		dataByStateName.Result, dataByStateName.Err = services.GetCovidDataByName(stateName)
+		dataByStateNameChan <- true
+	}(dataByStateName, dataByStateNameChan)
+
+	// get data via coordinates
+	go func(dataByCoordinate *tCustomResponse, dataByCoordinateChan chan bool) {
+		dataByCoordinate.Result, dataByCoordinate.Err = services.GetCovidDataByCoordinates(latLangQuery)
+		dataByCoordinateChan <- true
+	}(dataByCoordinate, dataByCoordinateChan)
+
+	<-dataByStateNameChan
+	<-dataByCoordinateChan
+
+	if dataByStateName.Err.Err != nil {
+		return c.JSON(response_model.DefaultResponse(dataByStateName.Err.StatusCode, dataByStateName.Err.Message(), true))
+	} else if dataByStateName.Result != nil {
+		log.Instance.Info("Data by state name found, appending to response")
+		responseData = append(responseData, dataByStateName.Result)
 	}
 
-	latLangQuery, _ := url.QueryUnescape(c.QueryParam("latlng"))
-	latLang = strings.Split(latLangQuery, ",")
+	if dataByCoordinate.Err.Err != nil {
+		return c.JSON(response_model.DefaultResponse(dataByCoordinate.Err.StatusCode, dataByCoordinate.Err.Message(), true))
+	} else if dataByCoordinate.Result != nil {
+		log.Instance.Info("Data by coordinates found, appending to response")
+		responseData = append(responseData, dataByCoordinate.Result)
+	}
 
-	if len(latLang) == 2 {
-		latLang[0], latLang[1] = strings.TrimSpace(latLang[0]), strings.TrimSpace(latLang[1])
+	// fetch all states data if none query params are provided
+	if len(responseData) == 0 {
+		log.Instance.Info("Fetching all states data as coordinates and state name not provided")
 
-		if len(latLang[0]) > 0 && len(latLang[1]) > 0 {
-			log.Instance.Info("Latitude and longitude provided are %v, %v", latLang[0], latLang[1])
-			stateName, _ = services.GetStateNameUsingLatAndLong(latLang)
+		allStatesData, allStatesDataErr := services.GetAllStateCovidData()
+		if allStatesDataErr.Err != nil {
+			return c.JSON(response_model.DefaultResponse(allStatesDataErr.StatusCode, allStatesDataErr.Message(), true))
 		} else {
-			log.Instance.Info("Latitude and longitude are invalid")
+			responseData = allStatesData
 		}
-
-	} else {
-		log.Instance.Info("Latitude and longitude are not provided or invalid")
 	}
 
-	if stateName == "" {
-		log.Instance.Info("Cannot determine requested state, therefore fetching all states covid data")
-		resp, err = services.GetAllStateCovidData()
-		if err != nil {
-			return c.JSON(response_model.DefaultResponse(http.StatusInternalServerError, err.Error(), false))
-		}
-
-		return c.JSON(response_model.DefaultResponse(http.StatusOK, resp, false))
-	}
-
-	resp, err = services.GetStateCovidData(stateName)
-	if err != nil {
-		return c.JSON(response_model.DefaultResponse(http.StatusInternalServerError, err.Error(), false))
-	}
-
-	return c.JSON(response_model.DefaultResponse(http.StatusOK, resp, false))
+	return c.JSON(response_model.DefaultResponse(http.StatusOK, responseData, false))
 }

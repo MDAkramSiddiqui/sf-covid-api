@@ -49,20 +49,20 @@ func (c *DataCron) Stop() {
 // from 3rd party API
 func updateCovidData() {
 	log.Instance.Debug("updateCovidData is hit")
-	log.Instance.Info("State cron job periodic call, updatign data of all states")
+	log.Instance.Info("State cron job periodic call, updating data of all states")
 
 	var covidStatesData []schema.TCovidState
 
-	data, err := services.GetAllStateCovidDataGovtApi()
-	if err != nil {
-		log.Instance.Err("Error while fetching all states data from 3rd party API, err: %v", err.Error())
+	allStatesData, allStatesDataErr := services.GetAllStateCovidDataGovtApi()
+	if allStatesDataErr.Err != nil {
+		log.Instance.Err("Error while fetching all states data from 3rd party API, err: %v", allStatesDataErr.Message())
 		return
 	}
 
-	json.Unmarshal(data, &covidStatesData)
+	json.Unmarshal(allStatesData, &covidStatesData)
 
-	mongoDriverInstance, err := drivers.GetMongoDriver()
-	if err != nil {
+	mongoDriverInstance, mongoDriverInstanceErr := drivers.GetMongoDriver()
+	if mongoDriverInstanceErr != nil {
 		return
 	}
 
