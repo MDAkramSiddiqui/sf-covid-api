@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"errors"
 	"io/ioutil"
 	"net/http"
 
@@ -25,8 +26,8 @@ func GetRequest(url string) ([]byte, error) {
 	}
 
 	if response.StatusCode != 200 {
-		log.Instance.Err("Requested data fetch call failed, err: %v", err.Error())
-		return nil, err
+		log.Instance.Err("Requested data fetch call failed")
+		return nil, errors.New("requested data fetch call failed")
 	}
 
 	return body, nil

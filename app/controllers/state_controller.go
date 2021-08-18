@@ -3,7 +3,6 @@ package controllers
 import (
 	"net/http"
 	"net/url"
-	"strings"
 
 	"github.com/MDAkramSiddiqui/sf-covid-api/app/log"
 	"github.com/MDAkramSiddiqui/sf-covid-api/app/response_model"
@@ -26,46 +25,45 @@ func StateController(c echo.Context) error {
 	log.Instance.Debug("StateController is hit")
 
 	var stateName string
-	var latLang []string
-	var err error
-	var resp []bson.M
+	var latLangQuery string
+	var responseData []bson.M
 
+	// checking provided state name
 	stateName = c.QueryParam("name")
-	if stateName == "" {
-		log.Instance.Info("State name is not provided")
+	latLangQuery, _ = url.QueryUnescape(c.QueryParam("latlng"))
+
+	log.Instance.Debug("Raw state name provided is %v", stateName)
+	log.Instance.Debug("Raw coordinates provided are %v", latLangQuery)
+
+	// get data via state name
+	dataByStateNameResult, dataByStateNameErr := services.GetCovidDataByName(stateName)
+	if dataByStateNameErr.Err != nil {
+		return c.JSON(response_model.DefaultResponse(dataByStateNameErr.StatusCode, dataByStateNameErr.Message(), true))
+	} else if dataByStateNameResult != nil {
+		log.Instance.Info("Covid data by state name found, appending to response")
+		responseData = append(responseData, dataByStateNameResult)
 	}
 
-	latLangQuery, _ := url.QueryUnescape(c.QueryParam("latlng"))
-	latLang = strings.Split(latLangQuery, ",")
+	// get data via coordinates
+	dataByCoordinatesResult, dataByCoordinatesErr := services.GetCovidDataByCoordinates(latLangQuery)
+	if dataByCoordinatesErr.Err != nil {
+		return c.JSON(response_model.DefaultResponse(dataByCoordinatesErr.StatusCode, dataByCoordinatesErr.Message(), true))
+	} else if dataByCoordinatesResult != nil {
+		log.Instance.Info("Covid data by coordinates found, appending to response")
+		responseData = append(responseData, dataByCoordinatesResult)
+	}
 
-	if len(latLang) == 2 {
-		latLang[0], latLang[1] = strings.TrimSpace(latLang[0]), strings.TrimSpace(latLang[1])
+	// fetch all states data if none query params are provided
+	if len(responseData) == 0 {
+		log.Instance.Info("Fetching all states data as coordinates and state name not provided")
 
-		if len(latLang[0]) > 0 && len(latLang[1]) > 0 {
-			log.Instance.Info("Latitude and longitude provided are %v, %v", latLang[0], latLang[1])
-			stateName, _ = services.GetStateNameUsingLatAndLong(latLang)
+		allStatesData, allStatesDataErr := services.GetAllStateCovidData()
+		if allStatesDataErr.Err != nil {
+			return c.JSON(response_model.DefaultResponse(dataByCoordinatesErr.StatusCode, dataByCoordinatesErr.Message(), true))
 		} else {
-			log.Instance.Info("Latitude and longitude are invalid")
+			responseData = allStatesData
 		}
-
-	} else {
-		log.Instance.Info("Latitude and longitude are not provided or invalid")
 	}
 
-	if stateName == "" {
-		log.Instance.Info("Cannot determine requested state, therefore fetching all states covid data")
-		resp, err = services.GetAllStateCovidData()
-		if err != nil {
-			return c.JSON(response_model.DefaultResponse(http.StatusInternalServerError, err.Error(), false))
-		}
-
-		return c.JSON(response_model.DefaultResponse(http.StatusOK, resp, false))
-	}
-
-	resp, err = services.GetStateCovidData(stateName)
-	if err != nil {
-		return c.JSON(response_model.DefaultResponse(http.StatusInternalServerError, err.Error(), false))
-	}
-
-	return c.JSON(response_model.DefaultResponse(http.StatusOK, resp, false))
+	return c.JSON(response_model.DefaultResponse(http.StatusOK, responseData, false))
 }
