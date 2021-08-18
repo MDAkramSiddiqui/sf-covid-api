@@ -13,7 +13,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-type TCustomResponse struct {
+type tCustomResponse struct {
 	Result primitive.M
 	Err    *utils.CustomErr
 }
@@ -42,20 +42,20 @@ func StateController(c echo.Context) error {
 	log.Instance.Debug("Raw state name provided is %v", stateName)
 	log.Instance.Debug("Raw coordinates provided are %v", latLangQuery)
 
-	dataByStateName := &TCustomResponse{}
-	dataByCoordinate := &TCustomResponse{}
+	dataByStateName := &tCustomResponse{}
+	dataByCoordinate := &tCustomResponse{}
 
 	dataByStateNameChan := make(chan bool)
 	dataByCoordinateChan := make(chan bool)
 
 	// get data via state name
-	go func(dataByStateName *TCustomResponse, dataByStateNameChan chan bool) {
+	go func(dataByStateName *tCustomResponse, dataByStateNameChan chan bool) {
 		dataByStateName.Result, dataByStateName.Err = services.GetCovidDataByName(stateName)
 		dataByStateNameChan <- true
 	}(dataByStateName, dataByStateNameChan)
 
 	// get data via coordinates
-	go func(dataByCoordinate *TCustomResponse, dataByCoordinateChan chan bool) {
+	go func(dataByCoordinate *tCustomResponse, dataByCoordinateChan chan bool) {
 		dataByCoordinate.Result, dataByCoordinate.Err = services.GetCovidDataByCoordinates(latLangQuery)
 		dataByCoordinateChan <- true
 	}(dataByCoordinate, dataByCoordinateChan)
