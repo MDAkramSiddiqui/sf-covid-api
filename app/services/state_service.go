@@ -199,15 +199,15 @@ func GetAllStateCovidData() ([]primitive.M, *utils.CustomErr) {
 func GetAllStateCovidDataGovtApi() ([]byte, *utils.CustomErr) {
 	log.Instance.Debug("GetAllStateCovidDataGovtApi is hit")
 
-	body, err := utils.GetRequest(constants.CovidDataApi)
-	if err != nil {
-		log.Instance.Err("Data fetch failed from 3rd party API, err: %v", err.Error())
-		return body, &utils.CustomErr{Err: err, StatusCode: http.StatusInternalServerError}
+	allStatesCovidData, allStatesCovidDataErr := utils.GetRequest(constants.CovidDataApi)
+	if allStatesCovidDataErr.Err != nil {
+		log.Instance.Err("Data fetch failed from 3rd party API, err: %v", allStatesCovidDataErr.Message())
+		return allStatesCovidData, &utils.CustomErr{Err: allStatesCovidDataErr.Err, StatusCode: allStatesCovidDataErr.StatusCode}
 	} else {
 		log.Instance.Info("Data fetch successfully from 3rd party API")
 	}
 
-	return body, &utils.CustomErr{}
+	return allStatesCovidData, &utils.CustomErr{}
 }
 
 // Determines state using provided coordinates if found else return empty string
@@ -229,9 +229,9 @@ func GetStateNameUsingLatAndLong(latLang []string) (string, *utils.CustomErr) {
 	url := buf.String()
 
 	response, getReqErr := utils.GetRequest(url)
-	if getReqErr != nil {
-		log.Instance.Err("State name request failed from 3rd party API for coordinates %v, %v, err: %v", latLang[0], latLang[1], getReqErr.Error())
-		return stateName, &utils.CustomErr{Err: getReqErr, StatusCode: http.StatusInternalServerError}
+	if getReqErr.Err != nil {
+		log.Instance.Err("State name request failed from 3rd party API for coordinates %v, %v, err: %v", latLang[0], latLang[1], getReqErr.Message())
+		return stateName, &utils.CustomErr{Err: getReqErr.Err, StatusCode: getReqErr.StatusCode}
 	}
 
 	json.Unmarshal(response, &stateData)

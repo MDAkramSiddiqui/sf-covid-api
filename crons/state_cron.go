@@ -49,7 +49,7 @@ func (c *DataCron) Stop() {
 // from 3rd party API
 func updateCovidData() {
 	log.Instance.Debug("updateCovidData is hit")
-	log.Instance.Info("State cron job periodic call, updatign data of all states")
+	log.Instance.Info("State cron job periodic call, updating data of all states")
 
 	var covidStatesData []schema.TCovidState
 
