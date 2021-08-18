@@ -45,14 +45,14 @@ func StateController(c echo.Context) error {
 	dataByStateName := &customStateChannel{}
 	dataByCoordinate := &customStateChannel{}
 
-	dataByStateNamechan := make(chan bool)
+	dataByStateNameChan := make(chan bool)
 	dataByCoordinateChan := make(chan bool)
 
 	// get data via state name
-	go func(dataByStateName *customStateChannel, dataByStateNamechan chan bool) {
+	go func(dataByStateName *customStateChannel, dataByStateNameChan chan bool) {
 		dataByStateName.Result, dataByStateName.Err = services.GetCovidDataByName(stateName)
-		dataByStateNamechan <- true
-	}(dataByStateName, dataByStateNamechan)
+		dataByStateNameChan <- true
+	}(dataByStateName, dataByStateNameChan)
 
 	// get data via coordinates
 	go func(dataByCoordinate *customStateChannel, dataByCoordinateChan chan bool) {
@@ -60,7 +60,7 @@ func StateController(c echo.Context) error {
 		dataByCoordinateChan <- true
 	}(dataByCoordinate, dataByCoordinateChan)
 
-	<-dataByStateNamechan
+	<-dataByStateNameChan
 	<-dataByCoordinateChan
 
 	if dataByStateName.Err.Err != nil {
