@@ -56,16 +56,16 @@ func StateController(c echo.Context) error {
 		log.Instance.Info("Cannot determine requested state, therefore fetching all states covid data")
 		resp, err = services.GetAllStateCovidData()
 		if err != nil {
-			return c.JSON(response_model.DefaultResponse(http.StatusInternalServerError, err.Error()))
+			return c.JSON(response_model.DefaultResponse(http.StatusInternalServerError, err.Error(), false))
 		}
 
-		return c.JSON(response_model.DefaultResponse(http.StatusOK, resp))
+		return c.JSON(response_model.DefaultResponse(http.StatusOK, resp, false))
 	}
 
 	resp, err = services.GetStateCovidData(stateName)
 	if err != nil {
-		return c.JSON(response_model.DefaultResponse(http.StatusInternalServerError, err.Error()))
+		return c.JSON(response_model.DefaultResponse(http.StatusInternalServerError, err.Error(), false))
 	}
 
-	return c.JSON(response_model.DefaultResponse(http.StatusOK, resp))
+	return c.JSON(response_model.DefaultResponse(http.StatusOK, resp, false))
 }

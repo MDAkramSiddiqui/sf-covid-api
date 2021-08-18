@@ -75,7 +75,13 @@ func customHTTPErrorHandler(err error, c echo.Context) {
 		code = he.Code
 	}
 	log.Instance.Err("Some internal error happened, err: %v", err.Error())
-	c.JSON(response_model.DefaultResponse(code, nil))
+	c.JSON(response_model.DefaultResponse(code, nil, false))
+}
+
+// custom 404 error handler
+func custom404ErrorHandler(c echo.Context) error {
+	log.Instance.Err("Requested url not found on server, url: %v", c.Request().URL)
+	return c.JSON(response_model.DefaultResponse(http.StatusNotFound, "requested url not found", true))
 }
 
 // @title SF-Covid-State Api
@@ -97,6 +103,9 @@ func main() {
 
 	// Set custom http error handler
 	e.HTTPErrorHandler = customHTTPErrorHandler
+
+	// Set custom 404 error handler
+	echo.NotFoundHandler = custom404ErrorHandler
 
 	// middlewares
 	e.Use(middleware.LoggerWithConfig(DefaultLoggerConfig))

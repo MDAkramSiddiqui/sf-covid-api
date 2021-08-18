@@ -8,7 +8,7 @@ import (
 )
 
 // default response builder for all messages
-func DefaultResponse(status int, data interface{}) (int, *schema.TDefaultResponse) {
+func DefaultResponse(status int, data interface{}, isForcedVisible bool) (int, *schema.TDefaultResponse) {
 	var response *schema.TDefaultResponse
 	if status >= 200 && status < 300 {
 		response = &schema.TDefaultResponse{
@@ -21,8 +21,8 @@ func DefaultResponse(status int, data interface{}) (int, *schema.TDefaultRespons
 			Message: data,
 		}
 
-		if os.Getenv(constants.Env) == constants.Production {
-			response.Message = "Something bad happened"
+		if os.Getenv(constants.Env) == constants.Production && !isForcedVisible {
+			response.Message = "Oops, something bad happened!"
 		}
 	}
 	return status, response
