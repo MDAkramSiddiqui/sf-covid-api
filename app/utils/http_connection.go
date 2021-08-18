@@ -30,5 +30,5 @@ func GetRequest(url string) ([]byte, *CustomErr) {
 		return nil, &CustomErr{Err: errors.New("requested data fetch call failed"), StatusCode: response.StatusCode}
 	}
 
-	return body, nil
+	return body, &CustomErr{}
 }
