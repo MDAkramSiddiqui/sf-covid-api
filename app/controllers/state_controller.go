@@ -35,7 +35,6 @@ func StateController(c echo.Context) error {
 	var latLangQuery string
 	var responseData []bson.M
 
-	// checking provided state name
 	stateName = c.QueryParam("name")
 	latLangQuery, _ = url.QueryUnescape(c.QueryParam("latlng"))
 
