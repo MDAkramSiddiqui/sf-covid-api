@@ -24,7 +24,7 @@ type tCustomResponse struct {
 // @Tags root
 // @Accept */*
 // @Produce json
-// @Param name query string false "State name for which covid data is required"
+// @Param name query string false "State name for which covid data is required, for all states data use india"
 // @Param latlng query string false "Latitude and longitude of user, eg. latlng=23.223,23.222"
 // @Success 200 {object} map[string]interface{}
 // @Router /covid-data/state [get]

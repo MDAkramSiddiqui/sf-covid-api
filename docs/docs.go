@@ -48,7 +48,7 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "State name for which covid data is required",
+                        "description": "State name for which covid data is required, for all states data use india",
                         "name": "name",
                         "in": "query"
                     },

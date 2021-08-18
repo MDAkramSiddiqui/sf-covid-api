@@ -19,7 +19,8 @@ paths:
       description: Get statewise covid data either via using name or latitude and
         longitude.
       parameters:
-      - description: State name for which covid data is required
+      - description: State name for which covid data is required, for all states data
+          use india
         in: query
         name: name
         type: string
